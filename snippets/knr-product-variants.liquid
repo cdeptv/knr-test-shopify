@@ -1,0 +1,56 @@
+{%- comment -%}
+  Sélecteur de variantes en liens natifs (?variant=ID) : fonctionne sans JS,
+  amélioré par <knr-product-info> (knr-product.js).
+  Utilisé dans le panneau produit (knr-product-main) et la carte produit (knr-engagement).
+  Styles : knr-product-variants.css, chargé par les sections qui rendent le snippet
+  (hors de la zone remplacée en JS au changement de variante).
+
+  Paramètres :
+  - product (objet produit)
+  - id_prefix (string) : préfixe unique des id, ex. 'KnrOption-{{ section.id }}'
+  - show_label (boolean) : affiche le nom de l'option (« Taille »)
+{%- endcomment -%}
+{%- unless product.has_only_default_variant -%}
+  {%- for option in product.options_with_values -%}
+    {%- assign option_label_id = id_prefix | append: '-' | append: forloop.index -%}
+    <div class="knr-variants__option">
+      {%- if show_label -%}
+        <p class="knr-variants__name" id="{{ option_label_id }}">{{ option.name | escape }}</p>
+      {%- endif -%}
+      <ul
+        class="knr-variants__values"
+        role="list"
+        {% if show_label %}
+          aria-labelledby="{{ option_label_id }}"
+        {% else %}
+          aria-label="{{ option.name | escape }}"
+        {% endif %}
+      >
+        {%- for value in option.values -%}
+          <li class="knr-variants__item">
+            {%- if value.variant -%}
+              <a
+                class="knr-variants__value"
+                href="{{ value.variant.url }}"
+                {% if value.selected %}
+                  aria-current="true"
+                {% endif %}
+                data-knr-variant-link
+              >
+                {{- value | escape -}}
+                {%- unless value.available -%}
+                  <span class="visually-hidden">({{ 'products.product.sold_out' | t }})</span>
+                {%- endunless -%}
+              </a>
+            {%- else -%}
+              <span class="knr-variants__value knr-variants__value--unavailable">
+                {{- value | escape -}}
+                <span class="visually-hidden">({{ 'products.product.unavailable' | t }})</span>
+              </span>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- endfor -%}
+{%- endunless -%}

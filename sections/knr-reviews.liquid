@@ -1,0 +1,53 @@
+{{ 'knr-base.css' | asset_url | stylesheet_tag }}
+{{ 'knr-reviews.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%}
+  Avis clients : conteneur KNR (titre, marges, largeur 720px de la maquette) autour du widget
+  de l'application d'avis (Judge.me), ajouté comme bloc d'application dans l'éditeur.
+  Sans bloc d'application, la section ne s'affiche pas (pas de titre orphelin).
+{%- endcomment -%}
+{%- if section.blocks.size > 0 -%}
+{%- comment -%} id fixe : ancre du lien « avis » du panneau produit (knr-product-main, href="#KnrReviews") {%- endcomment -%}
+<section class="knr knr-reviews" id="KnrReviews">
+  {%- if section.settings.heading != blank -%}
+    <h2 class="knr-reviews__heading knr-heading-lg">{{ section.settings.heading | escape }}</h2>
+  {%- endif -%}
+
+  <div class="knr-reviews__widget">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when '@app' -%}
+          {% render block %}
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "KNR — Avis clients",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre",
+      "default": "Avis clients"
+    },
+    {
+      "type": "paragraph",
+      "content": "Ajoutez le bloc « Avis » de votre application (Judge.me) dans cette section."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "KNR — Avis clients"
+    }
+  ]
+}
+{% endschema %}

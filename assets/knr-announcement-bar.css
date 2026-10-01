@@ -1,0 +1,33 @@
+/*
+ * KNR — bandeau d'annonce (knr-announcement-bar), groupe header.
+ * 32px, fond noir, texte 12/12 blanc centré, lien souligné 0.8px.
+ */
+
+.knr-announcement {
+  position: relative;
+  z-index: 2; /* reste au-dessus du visuel produit qui remonte dessous en desktop */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 var(--knr-gutter);
+  background-color: var(--knr-color-black);
+  color: var(--knr-color-white);
+}
+
+.knr-announcement__text {
+  margin: 0;
+  padding: 7px 0;
+  font-size: 12px;
+  line-height: 12px;
+  letter-spacing: 0;
+  text-align: center;
+}
+
+.knr-announcement__link {
+  display: inline-block;
+  padding-bottom: 2px;
+  border-bottom: 0.8px solid currentColor;
+  color: inherit;
+  text-decoration: none;
+}

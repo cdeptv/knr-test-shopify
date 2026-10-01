@@ -1,0 +1,114 @@
+{{ 'knr-base.css' | asset_url | stylesheet_tag }}
+{{ 'knr-newsletter.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%}
+  Inscription newsletter via le formulaire client natif de Shopify (form 'customer') :
+  l'e-mail crée un client avec le tag « newsletter » et l'accord marketing, visible dans l'admin.
+  Libellés et messages : traductions natives de Dawn (newsletter.*).
+{%- endcomment -%}
+{%- liquid
+  assign image = section.settings.image
+  assign form_id = 'KnrNewsletterForm-' | append: section.id
+-%}
+
+<section class="knr knr-newsletter" id="KnrNewsletter-{{ section.id }}">
+  <div class="knr-newsletter__media">
+    {%- if image -%}
+      {{
+        image
+        | image_url: width: 1360
+        | image_tag:
+          class: 'knr-newsletter__image',
+          widths: '342, 684, 1026, 1360',
+          sizes: '(min-width: 990px) calc(50vw - 40px), calc(100vw - 48px)',
+          loading: 'lazy',
+          alt: ''
+      }}
+    {%- else -%}
+      {{ 'lifestyle-2' | placeholder_svg_tag: 'knr-newsletter__image knr-newsletter__image--placeholder' }}
+    {%- endif -%}
+  </div>
+
+  <div class="knr-newsletter__content">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="knr-newsletter__heading knr-heading-xl">
+        {%- comment -%} Maquette mobile : le titre est précédé du nom du produit {%- endcomment -%}
+        {%- if product -%}<span class="knr-newsletter__product">{{ product.title | escape }} — </span>{%- endif -%}
+        {{- section.settings.heading | escape | newline_to_br -}}
+      </h2>
+    {%- endif -%}
+
+    <div class="knr-newsletter__subscribe">
+      {%- form 'customer', id: form_id, class: 'knr-newsletter__form' -%}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <div class="knr-newsletter__fields">
+          <label class="visually-hidden" for="KnrNewsletterEmail-{{ section.id }}">{{ 'newsletter.label' | t }}</label>
+          <input
+            id="KnrNewsletterEmail-{{ section.id }}"
+            class="knr-newsletter__input"
+            type="email"
+            name="contact[email]"
+            value="{{ form.email }}"
+            placeholder="{{ 'newsletter.label' | t }}"
+            autocomplete="email"
+            autocorrect="off"
+            autocapitalize="off"
+            required
+            {% if form.errors %}
+              aria-invalid="true"
+              aria-describedby="KnrNewsletterError-{{ section.id }}"
+            {% elsif form.posted_successfully? %}
+              aria-describedby="KnrNewsletterSuccess-{{ section.id }}"
+            {% endif %}
+          >
+          <button type="submit" class="knr-button knr-newsletter__button" name="commit">
+            {{- 'newsletter.button_label' | t -}}
+          </button>
+        </div>
+
+        {%- if form.errors -%}
+          <p id="KnrNewsletterError-{{ section.id }}" class="knr-newsletter__message" role="alert">
+            {{- form.errors.translated_fields.email | capitalize }}
+            {{ form.errors.messages.email -}}
+          </p>
+        {%- elsif form.posted_successfully? -%}
+          <p id="KnrNewsletterSuccess-{{ section.id }}" class="knr-newsletter__message" role="status">
+            {{- 'newsletter.success' | t -}}
+          </p>
+        {%- endif -%}
+      {%- endform -%}
+
+      {%- if section.settings.caption != blank -%}
+        <p class="knr-newsletter__caption knr-text-caption">{{ section.settings.caption | escape }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "KNR — Newsletter",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Titre"
+    },
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Mention sous le formulaire"
+    }
+  ],
+  "presets": [
+    {
+      "name": "KNR — Newsletter"
+    }
+  ]
+}
+{% endschema %}

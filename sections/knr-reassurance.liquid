@@ -1,0 +1,81 @@
+{{ 'knr-base.css' | asset_url | stylesheet_tag }}
+{{ 'knr-reassurance.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'knr-slider.js' | asset_url }}" defer="defer"></script>
+
+{%- comment -%}
+  Arguments de réassurance : un bloc par argument (titre + texte), réglés dans la section du template.
+  Desktop : colonnes. Mobile : un argument à la fois, au swipe, avec indicateur de position.
+{%- endcomment -%}
+{%- assign item_count = section.blocks.size -%}
+
+{%- if item_count > 0 -%}
+  <section class="knr knr-reassurance" id="KnrReassurance-{{ section.id }}">
+    <knr-slider class="knr-reassurance__slider">
+      <ul class="knr-reassurance__list knr-track" role="list" data-knr-slider-track>
+        {%- for block in section.blocks -%}
+          <li class="knr-reassurance__item" {{ block.shopify_attributes }}>
+            {%- if block.settings.title != blank -%}
+              <p class="knr-reassurance__title knr-text-label">{{ block.settings.title | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.text != blank -%}
+              <p class="knr-reassurance__text">{{ block.settings.text | escape | newline_to_br }}</p>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if item_count > 1 -%}
+        <div class="knr-dots knr-reassurance__dots">
+          {%- for block in section.blocks -%}
+            <button
+              type="button"
+              class="knr-dot"
+              aria-label="{{ 'sections.slideshow.load_slide' | t }} {{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}"
+              {% if forloop.first %}
+                aria-current="true"
+              {% endif %}
+              data-knr-slider-dot
+            ></button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </knr-slider>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "KNR — Réassurance",
+  "max_blocks": 6,
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Argument",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titre"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Texte",
+          "info": "Les retours à la ligne sont conservés sur desktop. Sur mobile, le texte tient sur une ligne continue."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "KNR — Réassurance",
+      "blocks": [
+        { "type": "item" },
+        { "type": "item" },
+        { "type": "item" },
+        { "type": "item" }
+      ]
+    }
+  ]
+}
+{% endschema %}

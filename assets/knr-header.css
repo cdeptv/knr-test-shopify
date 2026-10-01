@@ -1,0 +1,254 @@
+/*
+ * KNR — en-tête (knr-header), groupe header.
+ * Par défaut : fond blanc, texte noir, dans le flux.
+ * Sur une page qui contient la fiche produit KNR : transparent, blanc, superposé à l'image (maquette).
+ * Mobile : logo 130px, icônes gap 16px, menu dans un tiroir (details/summary).
+ * Desktop : logo 160px, navigation centrée (gap 24px), icônes gap 12px, compte visible.
+ */
+
+.knr-header {
+  --knr-header-fg: var(--knr-color-black);
+  --knr-header-contrast: var(--knr-color-white);
+
+  position: relative;
+  z-index: 3;
+  border-bottom: 1px solid var(--knr-color-sand);
+  background-color: var(--knr-color-white);
+  color: var(--knr-header-fg);
+}
+
+/* Fiche produit KNR : en-tête transparent superposé à l'image principale */
+body:has(.knr-product) .knr-header {
+  --knr-header-fg: var(--knr-color-white);
+  --knr-header-contrast: var(--knr-color-black);
+
+  position: absolute;
+  right: 0;
+  left: 0;
+  border-bottom: 0;
+  background-color: transparent;
+}
+
+/* Maquette desktop : en-tête posé 1px sous le bandeau d'annonce (y = 33px) */
+@media screen and (min-width: 990px) {
+  body:has(.knr-product) .knr-header {
+    margin-top: 1px;
+  }
+}
+
+/* Logo monochrome passé en blanc sur l'image */
+body:has(.knr-product) .knr-header__logo-image {
+  filter: brightness(0) invert(1);
+}
+
+.knr-header__inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 56px;
+  padding: 0 24px;
+}
+
+.knr-header__logo {
+  display: flex;
+  flex-shrink: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.knr-header__logo-image {
+  display: block;
+  width: 130px;
+  height: auto;
+}
+
+.knr-header__logo-text {
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.knr-header__nav {
+  display: none;
+}
+
+.knr-header__icons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* :where() pour que .knr-header__account / __burger puissent masquer leur élément */
+:where(.knr-header__icons > li) {
+  display: flex;
+}
+
+.knr-header__icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  list-style: none; /* masque le marqueur du <summary> du tiroir */
+  cursor: pointer;
+}
+
+.knr-header__icon::-webkit-details-marker {
+  display: none;
+}
+
+.knr-header__account {
+  display: none;
+}
+
+/* Pastille du panier : 12px, texte 8px (maquette) */
+.knr-header__cart-count {
+  position: absolute;
+  top: -4px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 12px;
+  height: 12px;
+  padding: 0 2px;
+  border-radius: 100px;
+  background-color: var(--knr-header-fg);
+  color: var(--knr-header-contrast);
+  font-size: 8px;
+  line-height: 8px;
+  letter-spacing: 0;
+}
+
+/* Bouton menu : 2 traits de 16px, en croix quand le tiroir est ouvert */
+.knr-header__burger-lines {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 5px;
+}
+
+.knr-header__burger-lines::before,
+.knr-header__burger-lines::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  transition: transform 0.2s ease, top 0.2s ease;
+}
+
+.knr-header__burger-lines::before {
+  top: 0;
+}
+
+.knr-header__burger-lines::after {
+  top: 4px;
+}
+
+.knr-header__drawer[open] .knr-header__burger-lines::before {
+  top: 2px;
+  transform: rotate(45deg);
+}
+
+.knr-header__drawer[open] .knr-header__burger-lines::after {
+  top: 2px;
+  transform: rotate(-45deg);
+}
+
+.knr-header__drawer-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  max-height: calc(100dvh - 88px); /* 88px = bandeau d'annonce (32) + en-tête (56) */
+  overflow-y: auto;
+  padding: 24px;
+  background-color: var(--knr-color-white);
+  color: var(--knr-color-black);
+}
+
+.knr-header__drawer-menu {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.knr-header__drawer-link {
+  display: block;
+  padding: 8px 0;
+  color: inherit;
+  font-size: 24px;
+  line-height: 32px;
+  text-decoration: none;
+}
+
+.knr-header__drawer-link--account {
+  margin-top: 16px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+@media screen and (min-width: 990px) {
+  .knr-header__logo-image {
+    width: 160px;
+  }
+
+  /* Navigation centrée sur la page, indépendamment de la largeur du logo et des icônes */
+  .knr-header__nav {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    display: block;
+    height: 100%;
+    transform: translateX(-50%);
+  }
+
+  .knr-header__menu {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .knr-header__menu-link {
+    color: inherit;
+    font-size: 12px;
+    line-height: 12px;
+    letter-spacing: 0;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .knr-header__menu-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .knr-header__icons {
+    gap: 12px;
+  }
+
+  .knr-header__account {
+    display: flex;
+  }
+
+  .knr-header__burger {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knr-header__burger-lines::before,
+  .knr-header__burger-lines::after {
+    transition: none;
+  }
+}

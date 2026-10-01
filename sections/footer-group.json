@@ -1,28 +1,68 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "name": "t:sections.footer.name",
   "type": "footer",
   "sections": {
-    "footer": {
-      "type": "footer",
-      "blocks": {},
-      "block_order": [],
+    "knr_footer": {
+      "type": "knr-footer",
+      "blocks": {
+        "menu_discover": {
+          "type": "menu",
+          "settings": {
+            "menu": "footer",
+            "heading": ""
+          }
+        },
+        "menu_service": {
+          "type": "menu",
+          "settings": {
+            "menu": "service-client",
+            "heading": ""
+          }
+        },
+        "menu_legal": {
+          "type": "menu",
+          "settings": {
+            "menu": "l-gal-transparence",
+            "heading": ""
+          }
+        },
+        "about": {
+          "type": "about",
+          "settings": {
+            "heading": "À propos de Maison Célestine",
+            "text": "Maison Célestine est une marque de soins anti-âge haut de gamme formulée autour d’actifs rares et certifiés biologiques, guidée par une expertise médicale et un rituel simple, précis et efficace.",
+            "image": "shopify://shop_images/Calque_1.svg",
+            "caption": "Certifié COSMOS ORGANIC par ECOCERT Greenlife",
+            "link_label": "Voir le certificat",
+            "link": "https://www.ecocert.com"
+          }
+        }
+      },
+      "block_order": [
+        "menu_discover",
+        "menu_service",
+        "menu_legal",
+        "about"
+      ],
       "settings": {
-        "color_scheme": "scheme-1",
-        "newsletter_enable": true,
-        "newsletter_heading": "Subscribe to our emails",
-        "enable_follow_on_shop": true,
-        "show_social": true,
-        "enable_country_selector": true,
-        "enable_language_selector": true,
-        "payment_enable": true,
-        "show_policy": true,
-        "margin_top": 0,
-        "padding_top": 36,
-        "padding_bottom": 36
+        "show_logo": true,
+        "show_country_selector": true,
+        "show_language_selector": true,
+        "copyright_text": "Tous droits réservés.",
+        "linkedin_link": "https://www.linkedin.com"
       }
     }
   },
   "order": [
-    "footer"
+    "knr_footer"
   ]
 }

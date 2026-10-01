@@ -1,0 +1,144 @@
+/*
+ * KNR — section Latest news (knr-latest-news)
+ * Mobile : titre, slider de cartes 255px, barre de progression, lien centré en bas.
+ * Desktop : titre et lien sur la même ligne, 4 cartes en grille (gap 8px).
+ * Pas de padding haut : l'espacement vient de la section précédente (maquette).
+ */
+
+.knr-news {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding-bottom: 64px;
+  background-color: var(--knr-color-white);
+}
+
+.knr-news__heading {
+  align-self: stretch;
+  padding: 0 var(--knr-gutter);
+}
+
+.knr-news__slider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+}
+
+.knr-news__list {
+  width: 100%;
+}
+
+.knr-news__item {
+  flex: 0 0 255px;
+}
+
+.knr-news__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* overflow: hidden empêche l'image d'agrandir le cadre carré (aspect-ratio) */
+.knr-news__media {
+  aspect-ratio: 1;
+  overflow: hidden;
+  background-color: var(--knr-color-cream);
+}
+
+.knr-news__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.knr-news__details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Surtitre + trait doré 16px, 8px dessous */
+.knr-news__eyebrow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.knr-news__eyebrow::after {
+  content: '';
+  width: 16px;
+  height: 0.8px;
+  background-color: var(--knr-color-gold);
+}
+
+/* Titre sur 2 lignes comme la maquette : colonne de titre étroite + lignes équilibrées */
+.knr-news__title {
+  max-width: 8.75em;
+  text-wrap: balance;
+}
+
+.knr-news__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Toute la carte est cliquable via le lien du titre */
+.knr-news__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.knr-news__excerpt {
+  margin: 0;
+}
+
+@media screen and (min-width: 990px) {
+  .knr-news {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    column-gap: 16px;
+    padding-bottom: 0;
+  }
+
+  .knr-news__heading {
+    grid-row: 1;
+  }
+
+  .knr-news__all {
+    grid-row: 1;
+    grid-column: 2;
+    margin-right: var(--knr-gutter);
+  }
+
+  .knr-news__slider {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
+
+  .knr-news__list {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    overflow: visible;
+  }
+
+  .knr-news__card {
+    gap: 16px;
+  }
+
+  .knr-news__details {
+    padding-right: 15px;
+  }
+
+  .knr-news__progress {
+    display: none;
+  }
+}

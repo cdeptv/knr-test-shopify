@@ -1,0 +1,172 @@
+{{ 'knr-base.css' | asset_url | stylesheet_tag }}
+{{ 'knr-header.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'knr-header.js' | asset_url }}" defer="defer"></script>
+
+{%- comment -%}
+  En-tête global (groupe header).
+  - Logo : réglage natif du thème (Paramètres du thème > Logo), sinon nom de la boutique.
+  - Navigation : menu Shopify choisi dans l'éditeur (niveau 1).
+  - Panier : lien vers le panier + pastille cart.item_count.
+  - Sur les pages qui contiennent la fiche produit KNR (.knr-product), l'en-tête devient transparent
+    et se superpose à l'image principale (knr-header.css, sélecteur :has()).
+{%- endcomment -%}
+{%- liquid
+  assign menu = section.settings.menu
+  assign has_menu = false
+  if menu.links.size > 0
+    assign has_menu = true
+  endif
+-%}
+
+<header class="knr knr-header" id="KnrHeader-{{ section.id }}">
+  <div class="knr-header__inner">
+    <a class="knr-header__logo" href="{{ routes.root_url }}">
+      {%- if settings.logo -%}
+        {{
+          settings.logo
+          | image_url: width: 480
+          | image_tag:
+            class: 'knr-header__logo-image',
+            widths: '160, 320, 480',
+            sizes: '(min-width: 990px) 160px, 130px',
+            alt: shop.name
+        }}
+      {%- else -%}
+        <span class="knr-header__logo-text">{{ shop.name | escape }}</span>
+      {%- endif -%}
+    </a>
+
+    {%- if has_menu -%}
+      <nav class="knr-header__nav" aria-label="{{ 'sections.header.menu' | t }}">
+        <ul class="knr-header__menu" role="list">
+          {%- for link in menu.links -%}
+            <li>
+              <a
+                class="knr-header__menu-link"
+                href="{{ link.url }}"
+                {% if link.current %}
+                  aria-current="page"
+                {% endif %}
+              >
+                {{- link.title | escape -}}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+
+    <ul class="knr-header__icons" role="list">
+      {%- if section.settings.store_locator_link != blank -%}
+        <li>
+          <a class="knr-header__icon" href="{{ section.settings.store_locator_link }}">
+            <span class="visually-hidden">{{ section.settings.store_locator_label | escape }}</span>
+            {%- render 'knr-icon', icon: 'pin' -%}
+          </a>
+        </li>
+      {%- endif -%}
+
+      {%- if shop.customer_accounts_enabled -%}
+        <li class="knr-header__account">
+          <a class="knr-header__icon" href="{{ routes.account_url }}">
+            <span class="visually-hidden">{{ 'customer.account.title' | t }}</span>
+            {%- render 'knr-icon', icon: 'user' -%}
+          </a>
+        </li>
+      {%- endif -%}
+
+      <li>
+        <a class="knr-header__icon" href="{{ routes.search_url }}">
+          <span class="visually-hidden">{{ 'general.search.search' | t }}</span>
+          {%- render 'knr-icon', icon: 'search' -%}
+        </a>
+      </li>
+
+      <li>
+        <a class="knr-header__icon knr-header__cart" href="{{ routes.cart_url }}">
+          <span class="visually-hidden">
+            {{- 'templates.cart.cart' | t -}}
+            {%- if cart.item_count > 0 %} ({{ 'sections.header.cart_count' | t: count: cart.item_count }}){% endif -%}
+          </span>
+          {%- render 'knr-icon', icon: 'bag' -%}
+          {%- if cart.item_count > 0 -%}
+            <span class="knr-header__cart-count" aria-hidden="true">
+              {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- else -%}99+{%- endif -%}
+            </span>
+          {%- endif -%}
+        </a>
+      </li>
+
+      {%- if has_menu -%}
+        <li class="knr-header__burger">
+          <details class="knr-header__drawer" data-knr-header-drawer>
+            <summary class="knr-header__icon">
+              <span class="visually-hidden">{{ 'sections.header.menu' | t }}</span>
+              <span class="knr-header__burger-lines" aria-hidden="true"></span>
+            </summary>
+            <nav class="knr-header__drawer-panel" aria-label="{{ 'sections.header.menu' | t }}">
+              <ul class="knr-header__drawer-menu" role="list">
+                {%- for link in menu.links -%}
+                  <li>
+                    <a
+                      class="knr-header__drawer-link"
+                      href="{{ link.url }}"
+                      {% if link.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      {{- link.title | escape -}}
+                    </a>
+                  </li>
+                {%- endfor -%}
+                {%- if shop.customer_accounts_enabled -%}
+                  <li>
+                    <a class="knr-header__drawer-link knr-header__drawer-link--account" href="{{ routes.account_url }}">
+                      {{- 'customer.account.title' | t -}}
+                    </a>
+                  </li>
+                {%- endif -%}
+              </ul>
+            </nav>
+          </details>
+        </li>
+      {%- endif -%}
+    </ul>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "KNR — En-tête",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Logo : Paramètres du thème > Logo. Sur la fiche produit KNR, il s'affiche en blanc sur l'image (prévoir un logo monochrome)."
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "header",
+      "content": "Lien points de vente"
+    },
+    {
+      "type": "url",
+      "id": "store_locator_link",
+      "label": "Lien"
+    },
+    {
+      "type": "text",
+      "id": "store_locator_label",
+      "label": "Libellé (lecteurs d'écran)",
+      "default": "Où nous trouver"
+    }
+  ],
+  "enabled_on": {
+    "groups": ["header"]
+  }
+}
+{% endschema %}

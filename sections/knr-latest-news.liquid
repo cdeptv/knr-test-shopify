@@ -1,0 +1,121 @@
+{{ 'knr-base.css' | asset_url | stylesheet_tag }}
+{{ 'knr-latest-news.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'knr-slider.js' | asset_url }}" defer="defer"></script>
+
+{%- comment -%}
+  Derniers articles du blog choisi dans l'éditeur.
+  Surtitre = première étiquette (tag) de l'article, texte = extrait de l'article
+  (à défaut, début du contenu).
+{%- endcomment -%}
+{%- liquid
+  assign blog = section.settings.blog
+  assign article_count = 0
+  if blog != blank
+    assign article_count = blog.articles_count | at_most: section.settings.articles_limit
+  endif
+-%}
+
+{%- if article_count > 0 -%}
+  <section class="knr knr-news" id="KnrNews-{{ section.id }}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="knr-news__heading knr-heading-lg">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+
+    <knr-slider class="knr-news__slider">
+      <ul class="knr-news__list knr-track" role="list" data-knr-slider-track>
+        {%- for article in blog.articles limit: article_count -%}
+          {%- liquid
+            if article.excerpt != blank
+              assign article_excerpt = article.excerpt | strip_html
+            else
+              assign article_excerpt = article.content | strip_html | truncatewords: 25
+            endif
+          -%}
+          <li class="knr-news__item">
+            <article class="knr-news__card">
+              <div class="knr-news__media">
+                {%- if article.image -%}
+                  {{
+                    article.image
+                    | image_url: width: 1002
+                    | image_tag:
+                      class: 'knr-news__image',
+                      widths: '255, 334, 510, 668, 1002',
+                      sizes: '(min-width: 990px) calc((100vw - 104px) / 4), 255px',
+                      loading: 'lazy',
+                      alt: ''
+                  }}
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'knr-news__image knr-news__image--placeholder' }}
+                {%- endif -%}
+              </div>
+
+              <div class="knr-news__details">
+                {%- if article.tags.size > 0 -%}
+                  <p class="knr-news__eyebrow">{{ article.tags.first | escape }}</p>
+                {%- endif -%}
+                <h3 class="knr-news__title knr-heading-md">
+                  <a class="knr-news__link" href="{{ article.url }}">{{ article.title | escape }}</a>
+                </h3>
+                {%- if article_excerpt != blank -%}
+                  <p class="knr-news__excerpt knr-text-lead">{{ article_excerpt }}</p>
+                {%- endif -%}
+              </div>
+            </article>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if article_count > 1 -%}
+        <div class="knr-progress knr-news__progress" aria-hidden="true">
+          <span
+            class="knr-progress__bar"
+            style="--knr-slider-progress: {{ 100.0 | divided_by: article_count }}%;"
+            data-knr-slider-progress
+          ></span>
+        </div>
+      {%- endif -%}
+    </knr-slider>
+
+    {%- if section.settings.link_label != blank -%}
+      <a class="knr-news__all knr-link" href="{{ blog.url }}">{{ section.settings.link_label | escape }}</a>
+    {%- endif -%}
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "KNR — Latest news",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre"
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "Blog"
+    },
+    {
+      "type": "range",
+      "id": "articles_limit",
+      "label": "Nombre d'articles",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Libellé du lien vers le blog"
+    }
+  ],
+  "presets": [
+    {
+      "name": "KNR — Latest news"
+    }
+  ]
+}
+{% endschema %}

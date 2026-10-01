@@ -539,5 +539,28 @@
       "expanded": "Formulaire de destinataire de carte-cadeau agrandi",
       "collapsed": "Formulaire de destinataire de carte-cadeau réduit"
     }
+  },
+  "knr": {
+    "breadcrumb": {
+      "label": "Fil d'Ariane"
+    },
+    "testimonials": {
+      "compare_label": "Comparer l'avant et l'après"
+    },
+    "delivery": {
+      "within_days": {
+        "one": "sous {{ count }} jour ouvré",
+        "other": "sous {{ count }} jours ouvrés"
+      }
+    },
+    "social": {
+      "linkedin": "LinkedIn"
+    },
+    "reviews": {
+      "count": {
+        "one": "{{ count }} avis",
+        "other": "{{ count }} avis"
+      }
+    }
   }
 }

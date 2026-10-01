@@ -1,0 +1,160 @@
+{{ 'knr-base.css' | asset_url | stylesheet_tag }}
+{{ 'knr-engagement.css' | asset_url | stylesheet_tag }}
+{{ 'knr-product-variants.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'knr-product.js' | asset_url }}" defer="defer"></script>
+
+{%- comment -%}
+  Le contenu vient d'un métaobjet « Bloc Engagement »
+  (engagement : engagement_image, engagement_text, engagement_signature, image_mobile).
+  Le réglage « Bloc Engagement » est relié, dans le template, au metafield produit custom.engagement :
+  chaque produit affiche son propre bloc, géré depuis sa fiche dans l'admin.
+  Le titre reste un réglage de section, commun à tous les produits.
+{%- endcomment -%}
+{%- liquid
+  assign engagement = section.settings.engagement
+  assign engagement_image = engagement.engagement_image.value.preview_image
+  assign engagement_image_mobile = engagement.image_mobile.value.preview_image
+  comment
+    Point focal réglé dans l'admin (Contenu > Fichiers) : cadrage de l'image principale
+  endcomment
+  assign engagement_focal = engagement.engagement_image.value.presentation.focal_point | append: ''
+  if engagement_focal != blank
+    assign engagement_image_style = 'object-position: ' | append: engagement_focal
+  endif
+  assign engagement_text = engagement.engagement_text.value
+  assign engagement_signature = engagement.engagement_signature.value
+-%}
+
+{%- if engagement_text != blank or engagement_image -%}
+  <section class="knr knr-engagement" id="KnrEngagement-{{ section.id }}">
+    <div class="knr-engagement__inner">
+      <div class="knr-engagement__media">
+        {%- if engagement_image -%}
+          <picture>
+          {%- comment -%} Cadrage mobile dédié (champ facultatif « image_mobile » du métaobjet) {%- endcomment -%}
+          {%- if engagement_image_mobile -%}
+            <source
+              media="(max-width: 989px)"
+              srcset="{{ engagement_image_mobile | image_url: width: 390 }} 390w, {{ engagement_image_mobile | image_url: width: 780 }} 780w, {{ engagement_image_mobile | image_url: width: 1170 }} 1170w"
+              sizes="100vw"
+            >
+          {%- endif -%}
+          {{
+            engagement_image
+            | image_url: width: 2880
+            | image_tag:
+              class: 'knr-engagement__image',
+              style: engagement_image_style,
+              widths: '390, 780, 1170, 1440, 2160, 2880',
+              sizes: '100vw',
+              loading: 'lazy',
+              alt: ''
+          }}
+          </picture>
+        {%- else -%}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'knr-engagement__image knr-engagement__image--placeholder' }}
+        {%- endif -%}
+      </div>
+
+      <div class="knr-engagement__content">
+        {%- if section.settings.eyebrow != blank -%}
+          <div class="knr-engagement__eyebrow">
+            <h2 class="knr-engagement__heading">{{ section.settings.eyebrow | escape }}</h2>
+            <span class="knr-engagement__divider" aria-hidden="true"></span>
+          </div>
+        {%- endif -%}
+
+        {%- if engagement_text != blank -%}
+          <figure class="knr-engagement__quote">
+            <blockquote class="knr-engagement__text">
+              <p>{{ engagement_text | escape | newline_to_br }}</p>
+            </blockquote>
+            {%- if engagement_signature != blank -%}
+              <figcaption class="knr-engagement__signature">{{ engagement_signature | escape }}</figcaption>
+            {%- endif -%}
+          </figure>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.show_product_card and product != blank -%}
+        {%- liquid
+          assign current_variant = product.selected_or_first_available_variant
+          assign card_image = current_variant.featured_image | default: product.featured_image
+          assign card_form_id = 'KnrCardForm-' | append: section.id
+          assign card_id_prefix = 'KnrCardOption-' | append: section.id
+        -%}
+        <knr-product-info class="knr-engagement__card" data-section-id="{{ section.id }}">
+          <div class="knr-engagement__card-inner" id="KnrCard-{{ section.id }}">
+            {%- if card_image -%}
+              {{
+                card_image
+                | image_url: width: 312
+                | image_tag:
+                  class: 'knr-engagement__card-image',
+                  widths: '104, 208, 312',
+                  sizes: '104px',
+                  loading: 'lazy',
+                  alt: ''
+              }}
+            {%- endif -%}
+
+            <div class="knr-engagement__card-details">
+              <p class="knr-engagement__card-title knr-text-label">{{ product.title | escape }}</p>
+              {%- render 'knr-product-variants', product: product, id_prefix: card_id_prefix, show_label: false -%}
+              <p class="knr-engagement__card-price">{{ current_variant.price | money }}</p>
+            </div>
+
+            {%- form 'product', product, id: card_form_id, class: 'knr-engagement__card-form' -%}
+              <input type="hidden" name="id" value="{{ current_variant.id }}">
+              <button
+                type="submit"
+                name="add"
+                class="knr-button knr-engagement__card-add"
+                {% unless current_variant.available %}
+                  disabled
+                {% endunless %}
+              >
+                {%- if current_variant.available -%}
+                  {{ 'products.product.add_to_cart' | t }}
+                {%- else -%}
+                  {{ 'products.product.sold_out' | t }}
+                {%- endif -%}
+              </button>
+            {%- endform -%}
+          </div>
+        </knr-product-info>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "KNR — Engagement",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Titre"
+    },
+    {
+      "type": "metaobject",
+      "id": "engagement",
+      "label": "Bloc Engagement",
+      "metaobject_type": "engagement",
+      "info": "Relier au metafield produit « Bloc Engagement » (custom.engagement) pour un contenu propre à chaque produit."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_card",
+      "label": "Afficher la carte produit (desktop)",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "KNR — Engagement"
+    }
+  ]
+}
+{% endschema %}

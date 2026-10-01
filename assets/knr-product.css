@@ -1,0 +1,755 @@
+/*
+ * KNR — section produit (knr-product-main)
+ * Mobile d'abord (maquette 390px), desktop à partir de 990px (maquette 1440px).
+ */
+
+.knr-product {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding-bottom: 24px;
+  /* Mobile : fond beige derrière la carte blanche (maquette) */
+  background-color: var(--knr-color-stone);
+}
+
+/* ---------- Galerie : slider mobile ---------- */
+
+.knr-product__media {
+  display: block;
+  position: relative;
+}
+
+.knr-product__media-list {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.knr-product__media-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* overflow: hidden empêche l'image d'agrandir le cadre (aspect-ratio) */
+.knr-product__media-item {
+  --knr-frame-ratio: 0.70909; /* 390 / 550 */
+  flex: 0 0 100%;
+  aspect-ratio: 390 / 550;
+  overflow: hidden;
+  scroll-snap-align: start;
+  background-color: var(--knr-color-cream);
+}
+
+/* Image principale : dégradé noir 24 % → 0 sur le tiers haut, pour la lisibilité de l'en-tête.
+   Maquette : mode de fusion « plus-darker » ; les navigateurs qui ne le gèrent pas l'ignorent (fusion normale). */
+.knr-product__media-item:first-child {
+  position: relative;
+}
+
+.knr-product__media-item:first-child::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0) 30%);
+  mix-blend-mode: plus-darker;
+  pointer-events: none;
+}
+
+.knr-product__media-cross {
+  display: none;
+}
+
+.knr-product__media-image {
+  /* Centre le point focal dans le cadre : s = largeur (ou hauteur) de l'image recadrée / celle du cadre,
+     position = (0.5 - focal × s) / (1 - s). Sans point focal : centre de l'image. */
+  --knr-sx: calc(var(--knr-image-ratio, 1) / var(--knr-frame-ratio));
+  --knr-sy: calc(var(--knr-frame-ratio) / var(--knr-image-ratio, 1));
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position:
+    clamp(0%, calc((0.5 - var(--knr-focal-x, 0.5) * var(--knr-sx)) / (1 - var(--knr-sx)) * 100%), 100%)
+    clamp(0%, calc((0.5 - var(--knr-focal-y, 0.5) * var(--knr-sy)) / (1 - var(--knr-sy)) * 100%), 100%);
+}
+
+/* Mobile : flèche « photo suivante » (maquette : icône 16px à 16px du bord droit), zone de clic 32px centrée dessus */
+.knr-product__media-next {
+  position: absolute;
+  top: 196px;
+  right: 8px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--knr-color-black);
+  cursor: pointer;
+}
+
+.knr-product__media-next .knr-icon,
+.knr-product__rituel-next .knr-icon {
+  transform: rotate(-90deg);
+}
+
+.knr-product__media-next[aria-disabled='true'] {
+  visibility: hidden;
+}
+
+/* Barre de progression : 10px au-dessus du panneau blanc */
+.knr-product__media-progress {
+  position: absolute;
+  bottom: 125px;
+  left: 50%;
+  width: 25%;
+  height: 0.8px;
+  overflow: hidden;
+  background-color: var(--knr-color-cream);
+  transform: translateX(-50%);
+}
+
+.knr-product__media-progress-bar {
+  display: block;
+  width: var(--knr-slider-progress);
+  height: 100%;
+  background-color: var(--knr-color-black);
+}
+
+/* ---------- Panneau d'informations ---------- */
+
+.knr-product__panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 8px;
+  z-index: 1;
+  margin: -115px 16px 0;
+  padding: 24px 16px;
+  background-color: var(--knr-color-white);
+}
+
+.knr-product__panel > * {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+/* Fil d'Ariane : desktop uniquement (absent de la maquette mobile) */
+.knr-product__breadcrumb {
+  display: none;
+}
+
+/* Préfixe .knr-product : doit l'emporter sur .knr-text-caption (knr-base.css) */
+.knr-product .knr-product__breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--knr-color-gold);
+}
+
+.knr-product__breadcrumb-item + .knr-product__breadcrumb-item::before {
+  content: '/';
+  content: '/' / '';
+  padding: 0 0.3em;
+}
+
+.knr-product__breadcrumb-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.knr-product__breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+/* Mobile : badges posés sur l'image, centrés, 16px sous l'en-tête superposé (56px) */
+.knr-product__badges {
+  position: absolute;
+  top: 72px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.knr-product__badge {
+  padding: 6px 4px 4px;
+  border-radius: var(--knr-radius);
+  background-color: var(--knr-color-white);
+  font-size: 12px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* Mobile : titre + prix sur la même ligne, note dessous (le conteneur s'efface de la grille) */
+.knr-product__heading {
+  display: contents;
+}
+
+/* Note moyenne : étoiles + note · nombre d'avis (10/14, doré clair) */
+.knr-product__rating {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: -0.02em;
+  color: var(--knr-color-gold-light);
+  text-decoration: none;
+}
+
+.knr-product__rating-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.knr-product__rating .knr-stars {
+  display: inline-flex;
+  color: var(--knr-color-gold);
+}
+
+.knr-product__rating-count::before {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+  background-color: currentColor;
+}
+
+.knr-product__title {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: 0.32px;
+  text-transform: uppercase;
+  color: inherit;
+}
+
+.knr-product__price {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.knr-product__price-main {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 0;
+}
+
+.knr-product__price-current {
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.knr-product__price-compare {
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.knr-product__price-unit {
+  margin: 0;
+  font-size: 8px;
+  line-height: 16px;
+  color: var(--knr-color-gold);
+}
+
+/* Scores (Yuka, INCI Beauty…) */
+.knr-product__scores {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.knr-product__score {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.knr-product__score + .knr-product__score::before {
+  content: '';
+  width: 2px;
+  height: 2px;
+  background-color: var(--knr-color-black);
+}
+
+.knr-product__tagline {
+  margin-top: 16px;
+}
+
+/* Sélecteur de variantes */
+.knr-product__variants {
+  margin-top: 24px;
+}
+
+.knr-product__variants:empty {
+  display: none;
+}
+
+/* Tailles en pleine largeur sur mobile (maquette : 2 × 159px). Styles communs : knr-product-variants.css */
+.knr-product .knr-variants__item {
+  flex: 1 1 0;
+}
+
+/* Ajout au panier + disponibilité */
+.knr-product__buy {
+  margin-top: 24px;
+}
+
+.knr-product__add {
+  width: 100%;
+}
+
+.knr-product__stock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Messages superposés : la hauteur est celle du plus long */
+.knr-product__stock-slides {
+  display: grid;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.knr-product__stock-slide {
+  letter-spacing: -0.02em;
+  grid-area: 1 / 1;
+  font-size: 10px;
+  line-height: 12px;
+  text-align: center;
+  transition: opacity 0.4s ease, visibility 0.4s;
+}
+
+.knr-product__stock-slide:not([data-active]) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Accordéons (description, bienfaits…) */
+.knr-product__accordions {
+  margin-top: 24px;
+}
+
+.knr-product__accordion {
+  border-top: 0.8px solid var(--knr-color-line);
+}
+
+/* Les icônes ne captent pas le survol : le curseur reste celui de leur parent */
+.knr-product .knr-icon {
+  pointer-events: none;
+}
+
+.knr-product__accordion-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 19.2px 0 20px; /* + bordure 0.8px = 20px au-dessus du titre, 60px par ligne */
+  list-style: none;
+  cursor: pointer;
+}
+
+.knr-product__accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+.knr-product__accordion .knr-icon--chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.knr-product__accordion[open] .knr-icon--chevron {
+  transform: rotate(180deg);
+}
+
+/* 8px sous le titre (maquette) : on compense le padding bas du summary */
+.knr-product__accordion-content {
+  margin-top: -12px;
+  padding-bottom: 20px;
+}
+
+/* Complétez votre rituel */
+.knr-product__rituel {
+  display: block;
+  margin-top: 24px;
+  padding: 16px 0;
+}
+
+.knr-product__rituel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.knr-product__rituel-title {
+  margin: 0;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: 12px;
+  line-height: 12px;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: inherit;
+}
+
+.knr-product__rituel-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.knr-product__rituel-next[aria-disabled='true'] {
+  opacity: 0.24;
+  cursor: default;
+}
+
+.knr-product__rituel-list {
+  display: flex;
+  gap: 8px;
+  margin: 24px -16px 0 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.knr-product__rituel-list::-webkit-scrollbar {
+  display: none;
+}
+
+.knr-product__card {
+  position: relative;
+  flex: 0 0 159px;
+  scroll-snap-align: start;
+}
+
+.knr-product__card-media {
+  position: relative;
+  height: 208px;
+  background-color: var(--knr-color-card);
+}
+
+.knr-product__card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.knr-product__card-form {
+  position: absolute;
+  bottom: 7px;
+  left: 8px;
+  z-index: 1;
+}
+
+.knr-product__card-add {
+  display: flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.knr-product__card-info {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 0 4px;
+  font-size: 10px;
+}
+
+/* Mobile : carte de 252,4px comme la maquette (infos 25px + 11,4px dessous) */
+@media screen and (max-width: 989px) {
+  .knr-product__card {
+    padding-bottom: 11.4px;
+  }
+
+  .knr-product__card-info {
+    min-height: 25px;
+  }
+}
+
+.knr-product__card-name {
+  letter-spacing: -0.02em;
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Toute la carte est cliquable (lien étiré), sauf le bouton « + » placé au-dessus */
+.knr-product__card-name::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.knr-product__card-price {
+  letter-spacing: 0;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+/* ---------- Desktop ---------- */
+
+@media screen and (min-width: 990px) {
+  .knr-product {
+    grid-template-columns: minmax(0, 1fr) 456px 40px;
+    padding-bottom: 0;
+    background-color: transparent;
+  }
+
+  .knr-product__media-next {
+    display: none;
+  }
+
+  /* Galerie : image 1 en pleine largeur, puis 2 colonnes à gauche du panneau */
+  .knr-product__media {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .knr-product__media-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 488px;
+    gap: 8px;
+    overflow: visible;
+  }
+
+  .knr-product__media-item {
+    --knr-frame-ratio: 0.76847; /* 468 / 609 */
+    aspect-ratio: 468 / 609;
+  }
+
+  .knr-product__media-item:first-child {
+    /* Maquette : l'image (760px) part du haut de page, ses 32 premiers pixels passent sous le bandeau d'annonce */
+    --knr-frame-ratio: 1.89474; /* 1440 / 760 */
+    grid-column: 1 / -1;
+    aspect-ratio: 1440 / 760;
+    margin-top: -32px;
+  }
+
+  .knr-product__media-item:nth-child(even) {
+    grid-column: 1;
+  }
+
+  .knr-product__media-item:nth-child(odd):not(:first-child) {
+    grid-column: 2;
+  }
+
+  .knr-product__media-progress {
+    display: none;
+  }
+
+  /* Repère « + » en bas à droite des photos 2 et suivantes (maquette : 24px du bord, blanc) */
+  .knr-product__media-item {
+    position: relative;
+  }
+
+  .knr-product__media-cross {
+    position: absolute;
+    right: 24px;
+    bottom: 24px;
+    display: flex;
+    color: var(--knr-color-white);
+    pointer-events: none;
+  }
+
+  /* Panneau : superposé à l'image 1, 96px sous son bord haut (128px sous le haut de page),
+     étiré jusqu'au bas des photos pour y caler « Complétez votre rituel » */
+  .knr-product__panel {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    margin: 96px 0 0;
+    padding: 40px 40px 0;
+  }
+
+  /* Ordre desktop : le prix passe sous le sélecteur de variantes */
+  .knr-product__breadcrumb {
+    display: block;
+    order: 1;
+  }
+
+  .knr-product__badges {
+    position: static;
+    order: 2;
+    justify-content: flex-start;
+    margin-top: 40px;
+  }
+
+  /* 22px de haut bordure comprise (maquette) */
+  .knr-product__badge {
+    padding: 5.5px 3.5px 3.5px;
+    border: 0.5px solid var(--knr-color-black);
+    background-color: transparent;
+  }
+
+  /* Titre (287px) et note (79px) côte à côte */
+  .knr-product__heading {
+    order: 3;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .knr-product__title {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+  }
+
+  .knr-product__rating {
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    width: 79px;
+    margin-top: 0;
+  }
+
+  .knr-product__rating-count::before {
+    display: none;
+  }
+
+  .knr-product__scores {
+    order: 4;
+    margin-top: 24px;
+  }
+
+  .knr-product__score-label {
+    font-weight: var(--font-body-weight-bold);
+  }
+
+  .knr-product__tagline {
+    order: 5;
+  }
+
+  .knr-product__variants {
+    order: 6;
+    margin-top: 40px;
+  }
+
+  .knr-product .knr-variants__option {
+    gap: 16px;
+  }
+
+  .knr-product .knr-variants__item {
+    flex: 0 0 auto;
+  }
+
+  .knr-product__price {
+    order: 7;
+    align-items: flex-start;
+    margin-top: 24px;
+  }
+
+  .knr-product__price-main {
+    gap: 4px;
+  }
+
+  .knr-product__price-current {
+    letter-spacing: -0.02em;
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .knr-product__price-compare {
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--knr-color-muted);
+  }
+
+  .knr-product__price-unit {
+    padding-bottom: 2px;
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .knr-product__buy {
+    order: 8;
+    margin-top: 40px;
+  }
+
+  .knr-product__stock-slide {
+    line-height: 14px;
+  }
+
+  .knr-product__accordions {
+    order: 9;
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+
+  /* Maquette : le bas des visuels des cartes est aligné sur le bas des photos 2 et 3.
+     margin-top: auto pousse le bloc en bas du panneau ; la marge négative (hauteur du nom + prix :
+     8px + 16px) laisse dépasser la légende sous les photos. */
+  .knr-product__rituel {
+    order: 10;
+    margin-top: auto;
+    margin-bottom: -24px;
+    padding: 0;
+  }
+
+  .knr-product__rituel-list {
+    margin-right: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knr-product__accordion .knr-icon--chevron,
+  .knr-product__stock-slide {
+    transition: none;
+  }
+}

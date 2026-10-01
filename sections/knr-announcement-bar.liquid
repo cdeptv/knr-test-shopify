@@ -1,0 +1,50 @@
+{{ 'knr-base.css' | asset_url | stylesheet_tag }}
+{{ 'knr-announcement-bar.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign text = section.settings.text
+  assign link_label = section.settings.link_label
+  assign link = section.settings.link
+  assign has_link = false
+  if link_label != blank and link != blank
+    assign has_link = true
+  endif
+-%}
+
+{%- if text != blank or has_link -%}
+  <div class="knr knr-announcement" role="region" aria-label="{{ 'sections.header.announcement' | t }}">
+    <p class="knr-announcement__text">
+      {{- text | escape -}}
+      {%- if has_link %}
+        <a class="knr-announcement__link" href="{{ link }}">{{ link_label | escape }}</a>
+      {%- endif -%}
+    </p>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "KNR — Bandeau d'annonce",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Texte"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Texte du lien",
+      "info": "Affiché souligné après le texte."
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Lien"
+    }
+  ],
+  "enabled_on": {
+    "groups": ["header"]
+  }
+}
+{% endschema %}

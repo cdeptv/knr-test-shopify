@@ -1,0 +1,224 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "knr-product-main",
+      "blocks": {
+        "score_yuka": {
+          "type": "score",
+          "settings": {
+            "label": "Yuka",
+            "value": "{{ product.metafields.custom.score_yuka.value }}"
+          }
+        },
+        "score_inci": {
+          "type": "score",
+          "settings": {
+            "label": "INCI Beauty",
+            "value": "{{ product.metafields.custom.score_inci.value }}"
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "title": "Description",
+            "open": true
+          }
+        },
+        "benefits": {
+          "type": "accordion",
+          "settings": {
+            "title": "Bienfaits",
+            "content": "<p>{{ product.metafields.custom.benefits | metafield_tag }}</p>",
+            "open": false
+          }
+        },
+        "key_ingredients": {
+          "type": "accordion",
+          "settings": {
+            "title": "Ingrédients clés",
+            "content": "<p>{{ product.metafields.custom.key_ingredients | metafield_tag }}</p>",
+            "open": false
+          }
+        },
+        "skin_types": {
+          "type": "accordion",
+          "settings": {
+            "title": "Adapté aux peaux",
+            "content": "<p>{{ product.metafields.custom.custom_skin_types | metafield_tag }}</p>",
+            "open": false
+          }
+        },
+        "message_1": {
+          "type": "message",
+          "settings": {
+            "text": "Livraison offerte dès 60 € d'achat."
+          }
+        },
+        "message_2": {
+          "type": "message",
+          "settings": {
+            "text": "Retours gratuits sous 30 jours."
+          }
+        },
+        "message_3": {
+          "type": "message",
+          "settings": {
+            "text": "Paiement 100 % sécurisé."
+          }
+        }
+      },
+      "block_order": [
+        "score_yuka",
+        "score_inci",
+        "description",
+        "benefits",
+        "key_ingredients",
+        "skin_types",
+        "message_1",
+        "message_2",
+        "message_3"
+      ],
+      "settings": {
+        "complementary_heading": "Complétez votre rituel",
+        "complementary_products": [
+          "huile-precieuse",
+          "serum-eclat",
+          "creme-regenerante"
+        ],
+        "delivery_label": "livraison estimée",
+        "delivery_days": 2
+      }
+    },
+    "engagement": {
+      "type": "knr-engagement",
+      "settings": {
+        "eyebrow": "Notre engagement pour une beauté régénérée",
+        "engagement": "{{ product.metafields.custom.engagement.value }}",
+        "show_product_card": true
+      }
+    },
+    "how_to_use": {
+      "type": "knr-how-to-use",
+      "settings": {
+        "heading": "How to use",
+        "steps": "{{ product.metafields.custom.how_to_step.value }}"
+      }
+    },
+    "testimonials": {
+      "type": "knr-testimonials",
+      "settings": {
+        "heading": "Ce que disent nos clientes",
+        "subheading": "Des transformations visibles dès 4 semaines. Nos clientes témoignent d'une peau visiblement régénérée, plus ferme et lumineuse.",
+        "testimonials": "{{ product.metafields.custom.testimonial.value }}",
+        "comparison": "{{ product.metafields.custom.produit.value }}",
+        "before_label": "Before",
+        "after_label": "After"
+      }
+    },
+    "faq": {
+      "type": "knr-faq",
+      "settings": {
+        "heading": "Questions fréquentes",
+        "faq_items": "{{ product.metafields.custom.faq.value }}",
+        "open_first": true
+      }
+    },
+    "reviews": {
+      "type": "knr-reviews",
+      "blocks": {
+        "judge_me_reviews_review_widget_WPKdkR": {
+          "type": "shopify://apps/judge-me-reviews/blocks/review_widget/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
+          "settings": {
+            "review_data": "real_data",
+            "max_width": 1200,
+            "show_shop_reviews": false,
+            "empty_state": "empty_widget"
+          }
+        }
+      },
+      "block_order": [
+        "judge_me_reviews_review_widget_WPKdkR"
+      ],
+      "settings": {
+        "heading": "Avis clients"
+      }
+    },
+    "latest_news": {
+      "type": "knr-latest-news",
+      "settings": {
+        "heading": "Latest news",
+        "blog": "news",
+        "articles_limit": 4,
+        "link_label": "Voir tous les articles"
+      }
+    },
+    "newsletter": {
+      "type": "knr-newsletter",
+      "settings": {
+        "image": "shopify://shop_images/Reinsurance_Image.png",
+        "heading": "L'alliance de la science botanique et du luxe naturel pour une peau visiblement rajeunie en 4 semaines.",
+        "caption": "Formule brevetée, testée dermatologiquement, 97 % d'ingrédients d'origine naturelle."
+      }
+    },
+    "reassurance": {
+      "type": "knr-reassurance",
+      "blocks": {
+        "item_1": {
+          "type": "item",
+          "settings": {
+            "title": "Livraison offerte",
+            "text": "Livraison offerte\ndès 60 € d'achat\nen France métropolitaine."
+          }
+        },
+        "item_2": {
+          "type": "item",
+          "settings": {
+            "title": "Retours gratuits",
+            "text": "Retours acceptés\njusqu'à 30 jours\naprès réception."
+          }
+        },
+        "item_3": {
+          "type": "item",
+          "settings": {
+            "title": "Paiement sécurisé",
+            "text": "Paiement 100 % sécurisé\npar carte bancaire,\nPayPal ou virement."
+          }
+        },
+        "item_4": {
+          "type": "item",
+          "settings": {
+            "title": "Service client",
+            "text": "Du lundi au vendredi\nde 9h à 18h par email\net téléphone."
+          }
+        }
+      },
+      "block_order": [
+        "item_1",
+        "item_2",
+        "item_3",
+        "item_4"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "engagement",
+    "how_to_use",
+    "testimonials",
+    "faq",
+    "reviews",
+    "latest_news",
+    "newsletter",
+    "reassurance"
+  ]
+}

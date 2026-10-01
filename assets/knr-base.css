@@ -1,0 +1,204 @@
+/*
+ * KNR — fondations partagées par les sections knr-*.
+ * Tout est scopé sous .knr (classe racine de chaque section knr-*),
+ * rien ne s'applique au reste du thème Dawn.
+ * Valeurs relevées dans la maquette (1440 desktop / 390 mobile).
+ * Breakpoint desktop : 990px, aligné sur celui de Dawn.
+ */
+
+/* :where() : spécificité nulle, les sections peuvent redéfinir couleur et police sans conflit d'ordre de chargement */
+:where(.knr) {
+  /* Couleurs */
+  --knr-color-black: #000;
+  --knr-color-white: #fff;
+  --knr-color-cream: #f9f8f5;
+  --knr-color-sand: #dcd5c3;
+  --knr-color-gold: #b5a282;
+  --knr-color-gold-light: #e2d3bb;
+  --knr-color-card: #f5f4f1;
+  --knr-color-stone: #dfdbd6;
+  --knr-color-muted: rgba(0, 0, 0, 0.24);
+  /* Bordures des accordéons / FAQ : valeur mobile relevée dans la maquette (bleutée), voir desktop plus bas */
+  --knr-color-line: rgba(0, 53, 146, 0.24);
+
+  /* Mise en page */
+  --knr-gutter: 24px;
+  --knr-radius: 2px;
+
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--font-body-weight);
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: -0.02em;
+  color: var(--knr-color-black);
+  /* L'Inter servi par Shopify est variable (axe opsz) : sans cela, le navigateur passe
+     automatiquement à la coupe « Display », plus étroite, dès 20px environ.
+     La maquette utilise la coupe standard : même chasse, mêmes retours à la ligne. */
+  font-optical-sizing: none;
+}
+
+@media screen and (min-width: 990px) {
+  :where(.knr) {
+    --knr-color-line: rgba(0, 0, 0, 0.24);
+    --knr-gutter: 40px;
+  }
+}
+
+/* Échelle typographique (neutralise les styles h1-h6 de Dawn) */
+.knr-heading-xl,
+.knr-heading-lg,
+.knr-heading-md,
+.knr-text-lead,
+.knr-text-label,
+.knr-text-caption {
+  margin: 0;
+  font-family: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.knr-heading-xl {
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -0.04em;
+}
+
+.knr-heading-lg {
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -0.04em;
+}
+
+.knr-heading-md {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+}
+
+.knr-text-lead {
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.02em;
+}
+
+.knr-text-label {
+  font-size: 14px;
+  line-height: 14px;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.knr-text-caption {
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: -0.02em;
+}
+
+@media screen and (min-width: 990px) {
+  .knr-heading-xl {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+
+/*
+ * Composants : sélecteurs en :where() (spécificité nulle).
+ * knr-base.css est rechargé par chaque section : sans :where(), une copie chargée plus bas
+ * dans la page écraserait les ajustements des sections précédentes.
+ */
+
+/* Boutons */
+:where(.knr-button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 1px solid var(--knr-color-black);
+  border-radius: var(--knr-radius);
+  background-color: var(--knr-color-black);
+  color: var(--knr-color-white);
+  font: inherit;
+  font-size: 13px;
+  line-height: 21px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:where(.knr-button:disabled, .knr-button[aria-disabled='true']) {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Lien souligné (0.8px, padding-bottom 2px dans la maquette) */
+:where(.knr-link) {
+  display: inline-flex;
+  padding-bottom: 2px;
+  border-bottom: 0.8px solid currentColor;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Liste défilante horizontale (scroll-snap natif) des sliders mobiles */
+:where(.knr-track) {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0 var(--knr-gutter);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 var(--knr-gutter);
+  scrollbar-width: none;
+}
+
+:where(.knr-track)::-webkit-scrollbar {
+  display: none;
+}
+
+/* position: relative : les éléments absolus des diapositives (ex. texte .visually-hidden)
+   restent contenus dans la liste et ne créent pas de défilement horizontal de la page */
+:where(.knr-track > *) {
+  position: relative;
+  scroll-snap-align: start;
+}
+
+/* Barre de progression des sliders (97.5px sur 390 = 25 %) */
+:where(.knr-progress) {
+  width: 25%;
+  height: 0.8px;
+  overflow: hidden;
+  background-color: var(--knr-color-sand);
+}
+
+:where(.knr-progress__bar) {
+  display: block;
+  width: var(--knr-slider-progress);
+  height: 100%;
+  background-color: var(--knr-color-black);
+}
+
+/* Indicateur de position (traits de 16 × 1px) : trait actif noir, autres en --knr-dot-color */
+:where(.knr-dots) {
+  display: flex;
+  gap: 8px;
+  /* Compense le padding des traits : l'indicateur n'occupe que 1px dans la mise en page (maquette) */
+  margin: -8px 0;
+}
+
+/* Zone cliquable agrandie par le padding, trait dessiné par le fond (content-box) */
+:where(.knr-dot) {
+  width: 16px;
+  height: 17px;
+  padding: 8px 0;
+  border: 0;
+  background-color: var(--knr-dot-color, var(--knr-color-sand));
+  background-clip: content-box;
+  cursor: pointer;
+}
+
+:where(.knr-dot[aria-current='true']) {
+  background-color: var(--knr-color-black);
+}

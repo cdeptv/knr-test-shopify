@@ -1,0 +1,127 @@
+/*
+ * KNR — section Newsletter (knr-newsletter)
+ * Mobile : image 232px, titre 32/40, champ et bouton empilés (gap 16px).
+ * Desktop : image 540px à gauche, contenu centré à droite, champ + bouton sur une ligne.
+ * Pas de padding haut sur mobile : l'espacement vient de la section précédente (maquette).
+ */
+
+.knr-newsletter {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 var(--knr-gutter) 64px;
+  background-color: var(--knr-color-white);
+}
+
+.knr-newsletter__media {
+  height: 232px;
+  overflow: hidden;
+  background-color: var(--knr-color-cream);
+}
+
+.knr-newsletter__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.knr-newsletter__content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.knr-newsletter__subscribe {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.knr-newsletter__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.knr-newsletter__input {
+  height: 48px;
+  margin: 0;
+  padding: 0 24px;
+  border: 0.8px solid var(--knr-color-sand);
+  border-radius: var(--knr-radius);
+  background-color: var(--knr-color-white);
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.knr-newsletter__input::placeholder {
+  color: var(--knr-color-black);
+  opacity: 1;
+}
+
+.knr-newsletter__message {
+  margin: 8px 0 0;
+}
+
+.knr-newsletter__caption {
+  margin: 0;
+}
+
+@media screen and (min-width: 990px) {
+  /* Nom du produit devant le titre : mobile uniquement (maquette) */
+  .knr-newsletter__product {
+    display: none;
+  }
+
+  .knr-newsletter {
+    flex-direction: row;
+    gap: 0;
+    padding: 120px var(--knr-gutter);
+  }
+
+  /* Deux colonnes de 680px (maquette) : 50 % chacune, padding inclus */
+  .knr-newsletter__media,
+  .knr-newsletter__content {
+    flex: 0 0 50%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .knr-newsletter__media {
+    height: 540px;
+  }
+
+  .knr-newsletter__content {
+    justify-content: center;
+    padding: 0 40px;
+  }
+
+  /* Maquette : colonne de texte de 600px (à 1440px) ; plafonnée pour garder les mêmes retours à la ligne sur grand écran */
+  .knr-newsletter__content > * {
+    max-width: 600px;
+  }
+
+  /* Champ + bouton dans un même cadre de 48px */
+  .knr-newsletter__fields {
+    flex-direction: row;
+    gap: 0;
+    height: 48px;
+    border: 0.8px solid var(--knr-color-sand);
+    border-radius: var(--knr-radius);
+  }
+
+  .knr-newsletter__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+  }
+
+  .knr-newsletter__button {
+    flex: 0 0 160px;
+    min-height: 0;
+    border-radius: 0 var(--knr-radius) var(--knr-radius) 0;
+  }
+}

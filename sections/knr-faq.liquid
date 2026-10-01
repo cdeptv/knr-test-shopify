@@ -1,0 +1,72 @@
+{{ 'knr-base.css' | asset_url | stylesheet_tag }}
+{{ 'knr-faq.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%}
+  Les questions viennent de métaobjets « FAQ » (faq_item : question, answer).
+  Le réglage « Questions » est relié, dans le template, au metafield produit custom.faq :
+  chaque produit affiche sa propre FAQ, gérée depuis sa fiche dans l'admin.
+{%- endcomment -%}
+{%- assign faq_items = section.settings.faq_items -%}
+
+{%- if faq_items != blank -%}
+  <section class="knr knr-faq" id="KnrFaq-{{ section.id }}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="knr-faq__heading knr-heading-xl">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+
+    <div class="knr-faq__list">
+      {%- for item in faq_items -%}
+        {%- if item.question != blank -%}
+          <details
+            class="knr-faq__item"
+            {% if forloop.first and section.settings.open_first %}
+              open
+            {% endif %}
+          >
+            <summary class="knr-faq__question">
+              <h3 class="knr-faq__question-text knr-heading-md">{{ item.question.value | escape }}</h3>
+              {%- render 'knr-icon', icon: 'chevron' -%}
+            </summary>
+            {%- if item.answer != blank -%}
+              <div class="knr-faq__answer knr-text-lead">
+                <p>{{ item.answer.value | escape | newline_to_br }}</p>
+              </div>
+            {%- endif -%}
+          </details>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "KNR — FAQ",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre"
+    },
+    {
+      "type": "metaobject_list",
+      "id": "faq_items",
+      "label": "Questions",
+      "metaobject_type": "faq_item",
+      "limit": 20,
+      "info": "Relier au metafield produit « FAQ » (custom.faq) pour une FAQ propre à chaque produit."
+    },
+    {
+      "type": "checkbox",
+      "id": "open_first",
+      "label": "Ouvrir la première question",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "KNR — FAQ"
+    }
+  ]
+}
+{% endschema %}

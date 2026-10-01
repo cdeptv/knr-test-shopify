@@ -274,7 +274,6 @@
       "announcement": "Announcement",
       "announcement_bar": "Announcement bar"
     },
-
     "header": {
       "announcement": "Announcement",
       "menu": "Menu",
@@ -527,6 +526,29 @@
       "max_characters": "{{ max_chars }} characters max",
       "send_on": "YYYY-MM-DD",
       "send_on_label": "Send on (optional)"
+    }
+  },
+  "knr": {
+    "breadcrumb": {
+      "label": "Breadcrumb"
+    },
+    "testimonials": {
+      "compare_label": "Compare before and after"
+    },
+    "delivery": {
+      "within_days": {
+        "one": "within {{ count }} business day",
+        "other": "within {{ count }} business days"
+      }
+    },
+    "social": {
+      "linkedin": "LinkedIn"
+    },
+    "reviews": {
+      "count": {
+        "one": "{{ count }} review",
+        "other": "{{ count }} reviews"
+      }
     }
   }
 }

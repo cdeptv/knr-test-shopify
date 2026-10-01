@@ -1,0 +1,39 @@
+/*
+ * KNR — sélecteur de variantes (snippet knr-product-variants).
+ * Partagé par la fiche produit (knr-product-main) et la carte produit (knr-engagement).
+ * Chaque section ajuste ensuite largeur et espacements avec un sélecteur préfixé.
+ */
+
+.knr-variants__option {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.knr-variants__name {
+  margin: 0;
+}
+
+.knr-variants__values {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.knr-variants__value {
+  display: flex;
+  justify-content: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Variante choisie : soulignement dessiné à l'intérieur de la boîte (hauteur inchangée) */
+.knr-variants__value[aria-current='true'] {
+  box-shadow: inset 0 -0.8px 0 var(--knr-color-black);
+}
+
+.knr-variants__value--unavailable {
+  opacity: 0.4;
+}

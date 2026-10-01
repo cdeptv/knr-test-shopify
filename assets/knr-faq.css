@@ -1,0 +1,80 @@
+/*
+ * KNR — section FAQ (knr-faq)
+ * Mobile : padding 40/24, titre 32/40, liste pleine largeur.
+ * Desktop : padding 120/40, titre 40/48, liste de 720px centrée.
+ */
+
+.knr-faq {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 40px var(--knr-gutter);
+  background-color: var(--knr-color-white);
+}
+
+.knr-faq__heading {
+  width: 100%;
+  text-align: center;
+}
+
+.knr-faq__list {
+  width: 100%;
+  max-width: 720px;
+}
+
+.knr-faq__item {
+  border-top: 1px solid var(--knr-color-line);
+}
+
+.knr-faq__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 19px 0 20px; /* + bordure 1px : question à 20px du trait, 72px par ligne (maquette) */
+  list-style: none;
+  cursor: pointer;
+}
+
+.knr-faq__question::-webkit-details-marker {
+  display: none;
+}
+
+.knr-faq__question .knr-icon {
+  flex-shrink: 0;
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.knr-faq__item[open] .knr-faq__question .knr-icon {
+  transform: rotate(180deg);
+}
+
+/* 16px sous la question (maquette) : on compense le padding bas du summary */
+/* Préfixe .knr-faq : doit l'emporter sur .knr-text-lead (knr-base.css) */
+.knr-faq .knr-faq__answer {
+  margin-top: -4px;
+  padding-bottom: 20px;
+}
+
+.knr-faq__answer p {
+  margin: 0;
+}
+
+@media screen and (min-width: 990px) {
+  .knr-faq {
+    gap: 80px;
+    padding: 120px 40px;
+  }
+
+  .knr-faq .knr-faq__question-text {
+    letter-spacing: -0.04em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knr-faq__question .knr-icon {
+    transition: none;
+  }
+}
