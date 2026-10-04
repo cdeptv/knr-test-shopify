@@ -1,0 +1,161 @@
+{%- comment -%}
+  Bloc « Choisissez vos échantillons offerts » du panier coulissant (pied du drawer).
+  Usage : {% render 'knr-cart-samples', block: samples_block, sample_count: sample_count, max: samples_max %}
+  - vignettes des échantillons déjà dans le panier (lignes `_knr_perk: sample`) ;
+  - emplacements vides jusqu'au maximum réglé dans le bloc ;
+  - bouton d'ouverture du panneau de sélection ;
+  - panneau de sélection (vue interne du drawer) : un formulaire de cases à cocher natives.
+    Le JS (knr-cart-drawer.js) compare la sélection au panier et envoie les ajouts / retraits.
+{%- endcomment -%}
+{%- liquid
+  assign empty_slots = max | minus: sample_count
+
+  # Variantes déjà dans le panier comme échantillons (délimitées pour un `contains` exact)
+  assign selected_ids = ','
+  for item in cart.items
+    if item.properties._knr_perk == 'sample'
+      assign selected_ids = selected_ids | append: item.variant_id | append: ','
+    endif
+  endfor
+-%}
+
+<div class="knr-cart-samples" {{ block.shopify_attributes }}>
+  <div class="knr-cart-samples__inner">
+    <div class="knr-cart-samples__heading">
+      <h3 class="knr-cart-samples__title">{{ block.settings.heading | escape }}</h3>
+      {%- if block.settings.subheading != blank -%}
+        <p class="knr-cart-samples__subtitle">{{ block.settings.subheading | replace: '[count]', max | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="knr-cart-samples__row">
+      <p class="visually-hidden">{{ 'knr.cart.samples_status' | t: count: sample_count, max: max }}</p>
+      <ul class="knr-cart-samples__slots" role="list">
+        {%- for item in cart.items -%}
+          {%- if item.properties._knr_perk == 'sample' -%}
+            <li class="knr-cart-samples__slot knr-cart-samples__slot--filled">
+              {%- if item.image -%}
+                {{
+                  item.image
+                  | image_url: width: 64
+                  | image_tag: loading: 'lazy', width: 28, height: 28, alt: item.product.title
+                }}
+              {%- else -%}
+                <span class="visually-hidden">{{ item.product.title | escape }}</span>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if empty_slots > 0 -%}
+          {%- for i in (1..empty_slots) -%}
+            <li class="knr-cart-samples__slot" aria-hidden="true">{% render 'knr-icon', icon: 'plus-small' %}</li>
+          {%- endfor -%}
+        {%- endif -%}
+      </ul>
+
+      <button
+        type="button"
+        class="knr-cart-samples__open"
+        data-knr-samples-open
+        aria-controls="KnrSamplesPanel"
+        aria-expanded="false"
+      >
+        {%- if sample_count > 0 -%}
+          {{ block.settings.edit_label | escape }}
+        {%- else -%}
+          {{ block.settings.choose_label | escape }}
+        {%- endif -%}
+      </button>
+    </div>
+  </div>
+</div>
+
+{%- comment -%} Panneau de sélection : recouvre le drawer, masqué tant qu'on n'a pas cliqué sur « Choisir » {%- endcomment -%}
+<div class="knr-cart-panel" id="KnrSamplesPanel" hidden data-knr-samples-panel>
+  <form
+    class="knr-cart-panel__form"
+    data-knr-samples-form
+    data-max="{{ max }}"
+    data-status="{{ 'knr.cart.samples_status' | t: count: '[count]', max: max | escape }}"
+  >
+    <div class="knr-cart-panel__header">
+      <button type="button" class="knr-cart-panel__back" data-knr-samples-close>
+        {%- render 'knr-icon', icon: 'arrow-left' -%}
+        <span class="visually-hidden">{{ 'knr.cart.back' | t }}</span>
+      </button>
+      <h3 class="knr-cart-panel__title" id="KnrSamplesTitle" tabindex="-1">
+        {{ block.settings.panel_title | escape }}
+      </h3>
+      <span class="knr-cart-panel__count" aria-hidden="true"><span data-knr-samples-count>0</span>/{{ max }}</span>
+    </div>
+
+    <fieldset class="knr-cart-panel__fieldset">
+      <legend class="visually-hidden">{{ 'knr.cart.samples_legend' | t: max: max }}</legend>
+      <ul class="knr-cart-panel__grid" role="list">
+        {%- for product in block.settings.samples -%}
+          {%- liquid
+            assign variant = product.selected_or_first_available_variant
+            assign variant_marker = ',' | append: variant.id | append: ','
+            assign is_selected = false
+            if selected_ids contains variant_marker
+              assign is_selected = true
+            endif
+          -%}
+          <li>
+            <label class="knr-cart-panel__tile{% unless variant.available %} is-sold-out{% endunless %}">
+              <input
+                type="checkbox"
+                class="knr-cart-panel__input"
+                name="sample"
+                value="{{ variant.id }}"
+                {% if is_selected %}
+                  checked
+                {% endif %}
+                {% unless variant.available %}
+                  disabled
+                {% endunless %}
+              >
+              <span class="knr-cart-panel__media">
+                {%- if product.featured_image -%}
+                  {{
+                    product.featured_image
+                    | image_url: width: 334
+                    | image_tag: loading: 'lazy', widths: '167, 334', sizes: '(min-width: 500px) 167px, 33vw', alt: ''
+                  }}
+                {%- endif -%}
+              </span>
+              <span class="knr-cart-panel__info">
+                <span class="knr-cart-panel__text">
+                  <span class="knr-cart-panel__name">{{ product.title | escape }}</span>
+                  {%- unless product.has_only_default_variant -%}
+                    <span class="knr-cart-panel__variant">{{ variant.title | escape }}</span>
+                  {%- endunless -%}
+                </span>
+                <span class="knr-cart-panel__action" aria-hidden="true">
+                  {%- if variant.available -%}
+                    <span class="knr-cart-panel__action-add">{{ 'knr.cart.sample_add' | t }}</span>
+                    <span class="knr-cart-panel__action-remove">{{ 'knr.cart.sample_remove' | t }}</span>
+                  {%- else -%}
+                    {{ 'products.product.sold_out' | t }}
+                  {%- endif -%}
+                </span>
+              </span>
+              {%- unless variant.available -%}
+                <span class="visually-hidden">{{ 'products.product.sold_out' | t }}</span>
+              {%- endunless -%}
+            </label>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </fieldset>
+
+    <div class="knr-cart-panel__bottom">
+      <button type="submit" class="knr-cart__cta knr-cart-panel__submit">
+        {{- block.settings.submit_label | escape -}}
+        <span class="knr-cart__cta-total" aria-hidden="true">
+          <span><span data-knr-samples-count>0</span>/{{ max }}</span>
+        </span>
+      </button>
+    </div>
+  </form>
+</div>

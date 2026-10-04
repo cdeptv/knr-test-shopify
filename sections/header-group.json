@@ -26,10 +26,73 @@
         "store_locator_link": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x47e66f3804a1f717:0x6d578f085d06e0d5",
         "store_locator_label": "Où nous trouver"
       }
+    },
+    "knr_cart_drawer": {
+      "type": "knr-cart-drawer",
+      "blocks": {
+        "shipping": {
+          "type": "shipping",
+          "settings": {
+            "threshold": 50,
+            "label": "Livraison offerte",
+            "message_before": "Plus que [amount] pour bénéficier de <strong>la livraison offerte</strong>",
+            "message_after": "Bravo, <strong>la livraison est offerte</strong> !"
+          }
+        },
+        "samples": {
+          "type": "samples",
+          "settings": {
+            "threshold": 75,
+            "label": "[count] échantillons offerts",
+            "message_before": "Plus que [amount] pour choisir <strong>[count] échantillons offerts</strong>",
+            "message_after": "Félicitations, vous avez débloqué <strong>vos échantillons offerts</strong> !",
+            "max_samples": 3,
+            "samples": [
+              "echantillon-serum-eclat",
+              "echantillon-creme-regenerante",
+              "echantillon-huile-precieuse",
+              "echantillon-serum-precieux-regenerant",
+              "echantillon-masque-repulpant",
+              "echantillon-baume-demaquillant",
+              "echantillon-creme-jeunesse",
+              "echantillon-masque-jeunesse",
+              "echantillon-masque-anti-cernes"
+            ],
+            "heading": "Choisissez vos échantillons offerts",
+            "subheading": "[count] échantillons offerts.",
+            "choose_label": "Choisir",
+            "edit_label": "Modifier",
+            "panel_title": "Echantillons",
+            "submit_label": "Valider votre choix"
+          }
+        },
+        "gift": {
+          "type": "gift",
+          "settings": {
+            "threshold": 100,
+            "label": "1 produit offert",
+            "message_before": "Plus que [amount] pour recevoir <strong>un produit offert</strong>",
+            "message_after": "Bravo, vous bénéficiez de tous vos cadeaux !",
+            "product": "huile-precieuse-copie"
+          }
+        }
+      },
+      "block_order": [
+        "shipping",
+        "samples",
+        "gift"
+      ],
+      "settings": {
+        "heading": "Votre panier",
+        "empty_text": "Votre panier est vide.",
+        "cta_label": "Voir mon panier",
+        "note": "Les frais de livraison et codes promo s’appliquent lors du paiement"
+      }
     }
   },
   "order": [
     "knr_announcement",
-    "knr_header"
+    "knr_header",
+    "knr_cart_drawer"
   ]
 }

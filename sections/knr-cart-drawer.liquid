@@ -1,0 +1,556 @@
+{%- comment -%}
+  KNR — Panier coulissant gamifié (Maison Célestine).
+  Placé dans le groupe d'en-tête : présent sur toutes les pages, réglable dans le Theme Editor.
+
+  Toute la logique métier est calculée ici, en Liquid, à partir de l'objet `cart` :
+  le JS (knr-cart-drawer.js) ne calcule aucun montant. Après chaque modification du panier,
+  il redemande cette section à Shopify (Section Rendering API) et remplace son contenu.
+
+  Paliers = blocs (shipping, samples, gift), à classer du plus petit au plus grand seuil.
+  Ils se calculent sur le « sous-total éligible » : les lignes payantes uniquement.
+  Les échantillons et le cadeau portent la propriété de ligne `_knr_perk` et sont exclus,
+  pour qu'ils ne fassent ni atteindre ni conserver un palier.
+{%- endcomment -%}
+
+{%- liquid
+  # 1. Lecture du panier : sous-total éligible, échantillons et cadeau présents
+  assign eligible_subtotal = 0
+  assign sample_count = 0
+  assign gift_line_key = ''
+  assign gift_line_variant_id = null
+
+  for item in cart.items
+    case item.properties._knr_perk
+      when 'sample'
+        assign sample_count = sample_count | plus: item.quantity
+      when 'gift'
+        assign gift_line_key = item.key
+        assign gift_line_variant_id = item.variant_id
+      else
+        assign eligible_subtotal = eligible_subtotal | plus: item.final_line_price
+    endcase
+  endfor
+
+  # Pastille : produits payants + cadeau ; les échantillons sont affichés à part
+  assign displayed_count = cart.item_count | minus: sample_count
+
+  # 2. Paliers : atteints, prochain palier, remplissage de la barre
+  # Les pastilles sont au centre de colonnes égales : la barre progresse par segment,
+  # linéairement entre deux pastilles (et non linéairement en euros).
+  assign tier_count = section.blocks.size
+  assign reached_count = 0
+  assign last_threshold = 0
+  assign progress = 100.0
+  assign next_block = null
+  assign last_reached_block = null
+  assign remaining = 0
+  assign prev_threshold = 0
+  assign prev_position = 0.0
+  assign samples_unlocked = false
+  assign samples_block = null
+  assign samples_max = 0
+  assign gift_unlocked = false
+  assign gift_variant = null
+
+  for block in section.blocks
+    assign threshold = block.settings.threshold | default: 0 | times: 100 | round
+    assign position = forloop.index0 | times: 2 | plus: 1 | times: 100.0 | divided_by: tier_count | divided_by: 2
+    assign is_reached = false
+    if eligible_subtotal >= threshold
+      assign is_reached = true
+      assign reached_count = reached_count | plus: 1
+      assign last_reached_block = block
+    endif
+
+    case block.type
+      when 'samples'
+        assign samples_block = block
+        assign samples_max = block.settings.max_samples
+        assign samples_unlocked = is_reached
+      when 'gift'
+        assign gift_variant = block.settings.product.selected_or_first_available_variant
+        assign gift_unlocked = is_reached
+    endcase
+
+    if is_reached == false and next_block == null
+      assign next_block = block
+      assign remaining = threshold | minus: eligible_subtotal
+      assign span = threshold | minus: prev_threshold
+      assign done = eligible_subtotal | minus: prev_threshold | at_least: 0
+      if span > 0
+        assign progress = position | minus: prev_position | times: done | divided_by: span | plus: prev_position
+      else
+        assign progress = prev_position
+      endif
+    endif
+
+    assign prev_threshold = threshold
+    assign prev_position = position
+    assign last_threshold = threshold
+  endfor
+
+  # 3. Message : « avant » du prochain palier, ou « après » du dernier quand tout est atteint
+  if next_block
+    assign remaining_html = remaining | money | prepend: '<strong class="knr-cart__amount">' | append: '</strong>'
+    assign message = next_block.settings.message_before | replace: '[amount]', remaining_html
+  elsif tier_count > 0
+    assign message = section.blocks.last.settings.message_after
+  endif
+  assign message = message | replace: '[count]', samples_max
+
+  assign gift_declined = false
+  if cart.attributes._knr_gift_declined == 'true'
+    assign gift_declined = true
+  endif
+-%}
+
+{{ 'knr-base.css' | asset_url | stylesheet_tag }}
+{{ 'knr-cart-drawer.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  Police de la maquette : Euclid Circular A (fichiers licenciés fournis par l'agence, servis par le CDN
+  Shopify depuis assets/). Limitée au panier : le reste du site suit la maquette du Test 1 (Inter).
+  Le drawer étant fermé au chargement, les deux graisses principales sont préchargées pour éviter
+  un changement de police visible à la première ouverture.
+{%- endcomment -%}
+{{ 'euclid-circular-a-400.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
+{{ 'euclid-circular-a-500.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
+<style>
+  {%- assign font_weights = '400,500,600,700' | split: ',' -%}
+  {%- for weight in font_weights -%}
+    {%- assign font_file = 'euclid-circular-a-' | append: weight | append: '.woff2' -%}
+    @font-face {
+      font-family: 'Euclid Circular A';
+      font-style: normal;
+      font-weight: {{ weight }};
+      font-display: swap;
+      src: url('{{ font_file | asset_url }}') format('woff2');
+    }
+  {%- endfor -%}
+</style>
+<script src="{{ 'knr-cart-drawer.js' | asset_url }}" defer="defer"></script>
+
+<knr-cart-drawer class="knr knr-cart" data-section-id="{{ section.id }}">
+  <dialog class="knr-cart__dialog" id="KnrCartDrawer" aria-labelledby="KnrCartTitle">
+    {%- comment -%}
+      Hors de la zone remplacée : les annonces restent lues entre deux rendus.
+      <span> et non <p> : Dawn masque les <p> vides (display: none), ce qui empêcherait l'annonce.
+    {%- endcomment -%}
+    <span class="visually-hidden" aria-live="polite" data-knr-cart-live></span>
+    {%- comment -%} Zone remplacée après chaque mise à jour du panier (Section Rendering API) {%- endcomment -%}
+    <div class="knr-cart__inner">
+      <header class="knr-cart__header">
+        <h2 class="knr-cart__title" id="KnrCartTitle" tabindex="-1">
+          <span class="knr-cart__bag" aria-hidden="true">
+            {%- render 'knr-icon', icon: 'bag-round' -%}
+            <span class="knr-cart__count">{{ displayed_count }}</span>
+          </span>
+          {{ section.settings.heading | escape }}
+        </h2>
+        <button type="button" class="knr-cart__close" data-knr-cart-close>
+          <span class="visually-hidden">{{ 'accessibility.close' | t }}</span>
+          {%- render 'knr-icon', icon: 'close' -%}
+        </button>
+      </header>
+
+      {%- if tier_count > 0 -%}
+        <div class="knr-cart__incentive">
+          <div class="knr-cart__incentive-inner">
+            <p class="knr-cart__message">{{ message }}</p>
+
+            <div class="knr-cart__track">
+              {%- liquid
+                # Les filtres ne s'enchaînent pas dans les arguments de `t` : on formate avant
+                assign eligible_money = eligible_subtotal | money
+                assign last_threshold_money = last_threshold | money
+              -%}
+              <div
+                class="knr-cart__progress"
+                role="progressbar"
+                aria-label="{{ 'knr.cart.progress_label' | t }}"
+                aria-valuemin="0"
+                aria-valuemax="{{ last_threshold | divided_by: 100.0 }}"
+                aria-valuenow="{{ eligible_subtotal | at_most: last_threshold | divided_by: 100.0 }}"
+                aria-valuetext="{{ 'knr.cart.progress_value' | t: current: eligible_money, total: last_threshold_money }}"
+                style="--knr-cart-progress: {{ progress | round: 2 }}%"
+              >
+                {%- comment -%} Élément de remplissage : une div vide serait masquée par Dawn (base.css, div:empty) {%- endcomment -%}
+                <span class="knr-cart__progress-fill"></span>
+              </div>
+
+              <ol class="knr-cart__tiers" role="list">
+                {%- for block in section.blocks -%}
+                  {%- assign threshold = block.settings.threshold | default: 0 | times: 100 | round -%}
+                  {%- assign threshold_money = threshold | money -%}
+                  {%- assign label = block.settings.label | replace: '[count]', samples_max -%}
+                  <li
+                    class="knr-cart__tier{% if eligible_subtotal >= threshold %} is-reached{% endif %}"
+                    {{ block.shopify_attributes }}
+                  >
+                    <span class="knr-cart__tier-icon" aria-hidden="true">
+                      {%- render 'knr-icon', icon: block.type -%}
+                    </span>
+                    <span class="knr-cart__tier-label">
+                      {{- label | escape -}}
+                      <span class="visually-hidden">
+                        :
+                        {% if eligible_subtotal >= threshold -%}
+                          {{- 'knr.cart.tier_reached' | t -}}
+                        {%- else -%}
+                          {{- 'knr.cart.tier_locked' | t: amount: threshold_money -}}
+                        {%- endif -%}
+                      </span>
+                    </span>
+                  </li>
+                {%- endfor -%}
+              </ol>
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+
+      <p class="knr-cart__error" role="alert" data-knr-cart-error hidden></p>
+
+      {%- if cart.item_count == 0 -%}
+        <p class="knr-cart__empty">{{ section.settings.empty_text | escape }}</p>
+      {%- else -%}
+        {%- comment -%}
+          Produits payants d'abord, produit offert en dernier (maquette) : Shopify classe cart.items
+          du plus récent au plus ancien, le cadeau ajouté automatiquement serait sinon en tête.
+          Les échantillons sont affichés en vignettes dans leur bloc, pas en lignes.
+
+          Une même variante peut occuper plusieurs lignes Shopify : la remise « Achetez X, obtenez Y »
+          attache une allocation aux unités qui qualifient le client, et Shopify scinde la ligne pour
+          garder des allocations homogènes. On regroupe donc l'affichage par variante (quantité et prix
+          cumulés) ; les boutons agissent sur les vraies lignes (clés transmises au snippet).
+        {%- endcomment -%}
+        <ul class="knr-cart__lines" role="list">
+          {%- assign rendered_variants = ',' -%}
+          {%- for item in cart.items -%}
+            {%- if item.properties._knr_perk != blank -%}
+              {%- continue -%}
+            {%- endif -%}
+            {%- assign variant_marker = ',' | append: item.variant_id | append: ',' -%}
+            {%- if rendered_variants contains variant_marker -%}
+              {%- continue -%}
+            {%- endif -%}
+            {%- liquid
+              assign rendered_variants = rendered_variants | append: item.variant_id | append: ','
+              assign group_quantity = 0
+              assign group_price = 0
+              assign group_original_price = 0
+              assign group_keys = ''
+              for line in cart.items
+                if line.variant_id == item.variant_id and line.properties._knr_perk == blank
+                  assign group_quantity = group_quantity | plus: line.quantity
+                  assign group_price = group_price | plus: line.final_line_price
+                  assign group_original_price = group_original_price | plus: line.original_line_price
+                  assign group_keys = group_keys | append: line.key | append: ','
+                endif
+              endfor
+            -%}
+            {%- render 'knr-cart-line',
+              item: item,
+              quantity: group_quantity,
+              line_price: group_price,
+              original_price: group_original_price,
+              keys: group_keys
+            -%}
+          {%- endfor -%}
+          {%- for item in cart.items -%}
+            {%- if item.properties._knr_perk == 'gift' -%}
+              {%- render 'knr-cart-line', item: item -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+
+        <footer class="knr-cart__footer">
+          {%- if samples_unlocked and samples_block -%}
+            {%- render 'knr-cart-samples', block: samples_block, sample_count: sample_count, max: samples_max -%}
+          {%- endif -%}
+
+          <div class="knr-cart__bottom">
+            <a class="knr-cart__cta" href="{{ routes.cart_url }}">
+              {{- section.settings.cta_label | escape -}}
+              <span class="knr-cart__cta-total">{{ cart.total_price | money }}</span>
+            </a>
+            {%- if section.settings.note != blank -%}
+              <p class="knr-cart__note">{{ section.settings.note | escape }}</p>
+            {%- endif -%}
+          </div>
+        </footer>
+      {%- endif -%}
+
+      {%- comment -%} État lu par le JS pour réconcilier le panier (échantillons, cadeau) {%- endcomment -%}
+      <script type="application/json" data-knr-cart-state>
+        {
+          "reachedCount": {{ reached_count }},
+          {%- comment -%}
+            Lignes payantes (sans propriété) : un ajout depuis une fiche produit incrémente la ligne existante.
+            Shopify peut en effet créer une 2e ligne pour la même variante quand la 1re porte une allocation
+            de remise (ici la remise « Achetez X, obtenez Y »), car la clé de ligne en dépend.
+          {%- endcomment -%}
+          "lines": [
+            {%- assign is_first = true -%}
+            {%- for item in cart.items -%}
+              {%- liquid
+                # Ligne sans aucune propriété (le filtre size ne s'applique pas à l'objet properties)
+                assign property_count = 0
+                for property in item.properties
+                  assign property_count = property_count | plus: 1
+                endfor
+              -%}
+              {%- if property_count == 0 -%}
+                {%- unless is_first %},{% endunless %}
+                { "key": {{ item.key | json }}, "variantId": {{ item.variant_id }}, "quantity": {{ item.quantity }} }
+                {%- assign is_first = false -%}
+              {%- endif -%}
+            {%- endfor -%}
+          ],
+          "unlockedMessage": {{ last_reached_block.settings.message_after | replace: '[count]', samples_max | json }},
+          "samples": {
+            "unlocked": {{ samples_unlocked }},
+            "max": {{ samples_max }},
+            "lines": [
+              {%- assign is_first = true -%}
+              {%- for item in cart.items -%}
+                {%- if item.properties['_knr_perk'] == 'sample' -%}
+                  {%- liquid
+                    # Échantillon toujours proposé dans le Theme Editor et disponible ?
+                    assign is_valid = false
+                    for sample in samples_block.settings.samples
+                      if sample.id == item.product_id and item.variant.available
+                        assign is_valid = true
+                        break
+                      endif
+                    endfor
+                  -%}
+                  {%- unless is_first %},{% endunless %}
+                  { "key": {{ item.key | json }}, "variantId": {{ item.variant_id }}, "quantity": {{ item.quantity }}, "valid": {{ is_valid }} }
+                  {%- assign is_first = false -%}
+                {%- endif -%}
+              {%- endfor -%}
+            ]
+          },
+          "gift": {
+            "unlocked": {{ gift_unlocked }},
+            "variantId": {{ gift_variant.id | default: 'null' }},
+            "available": {{ gift_variant.available | default: false }},
+            "lineKey": {{ gift_line_key | json }},
+            "lineVariantId": {{ gift_line_variant_id | default: 'null' }},
+            "declined": {{ gift_declined }}
+          }
+        }
+      </script>
+    </div>
+  </dialog>
+</knr-cart-drawer>
+
+{% schema %}
+{
+  "name": "KNR — Panier",
+  "class": "knr-cart-section",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Les paliers se calculent sur les produits payants (hors échantillons et cadeau). Classez-les du plus petit au plus grand seuil. Dans les messages, [amount] = montant restant, [count] = nombre d'échantillons."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre",
+      "default": "Votre panier"
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Texte du panier vide",
+      "default": "Votre panier est vide."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Libellé du bouton",
+      "default": "Voir mon panier"
+    },
+    {
+      "type": "text",
+      "id": "note",
+      "label": "Mention sous le bouton",
+      "default": "Les frais de livraison et codes promo s’appliquent lors du paiement"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "shipping",
+      "name": "Livraison offerte",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Ce palier affiche l'avantage. La livraison gratuite elle-même se configure dans Paramètres > Expédition et livraison, avec le même seuil."
+        },
+        {
+          "type": "number",
+          "id": "threshold",
+          "label": "Seuil (€)",
+          "default": 50
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Libellé",
+          "default": "Livraison offerte"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "message_before",
+          "label": "Message avant le palier",
+          "default": "Plus que [amount] pour bénéficier de <strong>la livraison offerte</strong>"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "message_after",
+          "label": "Message une fois le palier atteint",
+          "default": "Bravo, <strong>la livraison est offerte</strong> !"
+        }
+      ]
+    },
+    {
+      "type": "samples",
+      "name": "Échantillons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "number",
+          "id": "threshold",
+          "label": "Seuil (€)",
+          "default": 75
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Libellé",
+          "default": "[count] échantillons offerts"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "message_before",
+          "label": "Message avant le palier",
+          "default": "Plus que [amount] pour choisir <strong>[count] échantillons offerts</strong>"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "message_after",
+          "label": "Message une fois le palier atteint",
+          "default": "Félicitations, vous avez débloqué <strong>vos échantillons offerts</strong> !"
+        },
+        {
+          "type": "header",
+          "content": "Échantillons"
+        },
+        {
+          "type": "range",
+          "id": "max_samples",
+          "label": "Nombre maximum",
+          "min": 1,
+          "max": 6,
+          "step": 1,
+          "default": 3
+        },
+        {
+          "type": "product_list",
+          "id": "samples",
+          "label": "Échantillons proposés",
+          "info": "Produits dédiés à 0 €, non publiés dans les collections.",
+          "limit": 24
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Titre du bloc",
+          "default": "Choisissez vos échantillons offerts"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Sous-titre du bloc",
+          "default": "[count] échantillons offerts."
+        },
+        {
+          "type": "text",
+          "id": "choose_label",
+          "label": "Bouton « choisir »",
+          "default": "Choisir"
+        },
+        {
+          "type": "text",
+          "id": "edit_label",
+          "label": "Bouton « modifier »",
+          "default": "Modifier"
+        },
+        {
+          "type": "text",
+          "id": "panel_title",
+          "label": "Titre du panneau de sélection",
+          "default": "Echantillons"
+        },
+        {
+          "type": "text",
+          "id": "submit_label",
+          "label": "Bouton de validation",
+          "default": "Valider votre choix"
+        }
+      ]
+    },
+    {
+      "type": "gift",
+      "name": "Produit offert",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Le produit est ajouté et retiré automatiquement. Sa gratuité est garantie par une remise automatique « Achetez X, obtenez Y » (Remises), avec le même seuil."
+        },
+        {
+          "type": "number",
+          "id": "threshold",
+          "label": "Seuil (€)",
+          "default": 100
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Libellé",
+          "default": "1 produit offert"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "message_before",
+          "label": "Message avant le palier",
+          "default": "Plus que [amount] pour recevoir <strong>un produit offert</strong>"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "message_after",
+          "label": "Message une fois le palier atteint",
+          "default": "Bravo, vous bénéficiez de tous vos cadeaux !"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Produit offert"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "KNR — Panier",
+      "blocks": [{ "type": "shipping" }, { "type": "samples" }, { "type": "gift" }]
+    }
+  ]
+}
+{% endschema %}

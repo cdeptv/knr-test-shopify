@@ -6,7 +6,7 @@
   En-tête global (groupe header).
   - Logo : réglage natif du thème (Paramètres du thème > Logo), sinon nom de la boutique.
   - Navigation : menu Shopify choisi dans l'éditeur (niveau 1).
-  - Panier : lien vers le panier + pastille cart.item_count.
+  - Panier : lien vers le panier (ouvre le panier coulissant knr-cart-drawer) + pastille.
   - Sur les pages qui contiennent la fiche produit KNR (.knr-product), l'en-tête devient transparent
     et se superpose à l'image principale (knr-header.css, sélecteur :has()).
 {%- endcomment -%}
@@ -83,15 +83,36 @@
       </li>
 
       <li>
-        <a class="knr-header__icon knr-header__cart" href="{{ routes.cart_url }}">
+        {%- liquid
+          # Pastille : produits payants + cadeau ; les échantillons offerts ne sont pas comptés
+          assign cart_count = cart.item_count
+          for item in cart.items
+            if item.properties['_knr_perk'] == 'sample'
+              assign cart_count = cart_count | minus: item.quantity
+            endif
+          endfor
+        -%}
+        {%- comment -%}
+          Sans JS : lien vers /cart. Avec JS : ouvre le panier coulissant (knr-cart-drawer.js),
+          qui re-rend ce lien (data-section-id) après chaque modification du panier.
+        {%- endcomment -%}
+        <a
+          class="knr-header__icon knr-header__cart"
+          href="{{ routes.cart_url }}"
+          data-knr-cart-toggle
+          data-section-id="{{ section.id }}"
+          aria-haspopup="dialog"
+          aria-controls="KnrCartDrawer"
+          aria-expanded="false"
+        >
           <span class="visually-hidden">
             {{- 'templates.cart.cart' | t -}}
-            {%- if cart.item_count > 0 %} ({{ 'sections.header.cart_count' | t: count: cart.item_count }}){% endif -%}
+            {%- if cart_count > 0 %} ({{ 'sections.header.cart_count' | t: count: cart_count }}){% endif -%}
           </span>
           {%- render 'knr-icon', icon: 'bag' -%}
-          {%- if cart.item_count > 0 -%}
+          {%- if cart_count > 0 -%}
             <span class="knr-header__cart-count" aria-hidden="true">
-              {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- else -%}99+{%- endif -%}
+              {%- if cart_count < 100 -%}{{ cart_count }}{%- else -%}99+{%- endif -%}
             </span>
           {%- endif -%}
         </a>

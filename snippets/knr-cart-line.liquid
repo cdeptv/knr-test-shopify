@@ -1,0 +1,152 @@
+{%- comment -%}
+  Une ligne du panier coulissant (knr-cart-drawer). Les échantillons n'utilisent pas ce snippet :
+  ils sont affichés en vignettes dans le bloc échantillons.
+
+  Usage :
+    {% render 'knr-cart-line', item: item %}  (cadeau : une ligne Shopify)
+    {% render 'knr-cart-line', item: item, quantity: …, line_price: …, original_price: …, keys: 'clé1,clé2,' %}
+    (produit payant : lignes Shopify d'une même variante regroupées, `item` = la première)
+
+  Formulaires natifs, fonctionnels sans JavaScript (le JS les intercepte et les envoie en AJAX) :
+  - quantité : POST /cart/change sur la première ligne du groupe (id = clé, quantity = valeur du bouton) ;
+  - suppression : POST /cart/update, toutes les lignes du groupe à 0 ;
+  - cadeau : POST /cart/update, qui retire la ligne ET mémorise le refus dans un attribut de panier
+    (_knr_gift_declined), pour que le cadeau ne soit pas ré-ajouté automatiquement.
+  Les boutons sont repérés par variante (data-knr-focus) : la clé d'une ligne peut changer
+  quand Shopify scinde ou regroupe les lignes, la variante non.
+{%- endcomment -%}
+{%- liquid
+  assign is_gift = false
+  if item.properties._knr_perk == 'gift'
+    assign is_gift = true
+  endif
+
+  assign total_quantity = quantity | default: item.quantity
+  assign total_price = line_price | default: item.final_line_price
+  assign total_original_price = original_price | default: item.original_line_price
+  assign line_keys = keys | default: item.key | split: ','
+
+  assign rating = item.product.metafields.reviews.rating.value
+  assign rating_count = item.product.metafields.reviews.rating_count.value | default: 0
+  assign title = item.product.title | escape
+-%}
+
+<li class="knr-cart-line{% if is_gift %} knr-cart-line--gift{% endif %}">
+  <a class="knr-cart-line__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+    {%- liquid
+      # Média de la variante (ou du produit) : il porte le point focal réglé dans l'admin
+      assign media = item.variant.featured_media | default: item.product.featured_media
+      assign image = media.preview_image | default: item.image
+
+      # Vignette recadrée (object-fit: cover) : même calcul que la fiche produit (knr-product.css),
+      # le CSS centre le point focal dans le cadre à partir du ratio de l'image.
+      assign focal_style = '--knr-image-ratio: ' | append: image.aspect_ratio | append: ';'
+      if media.presentation.focal_point != blank
+        assign focal_parts = media.presentation.focal_point | append: '' | remove: '%' | split: ' '
+        assign focal_x = focal_parts[0] | divided_by: 100.0
+        assign focal_y = focal_parts[1] | divided_by: 100.0
+        assign focal_style = focal_style | append: ' --knr-focal-x: ' | append: focal_x | append: '; --knr-focal-y: ' | append: focal_y | append: ';'
+      endif
+
+      # Largeur réellement affichée : hauteur du cadre (≈ 103px) × ratio de l'image recadrée
+      assign rendered_width = image.aspect_ratio | times: 103 | ceil | at_least: 88
+      assign image_sizes = rendered_width | append: 'px'
+    -%}
+    {%- if image -%}
+      {{
+        image
+        | image_url: width: 600
+        | image_tag: loading: 'lazy', widths: '150, 300, 450, 600', sizes: image_sizes, alt: '', style: focal_style
+      }}
+    {%- endif -%}
+  </a>
+
+  <div class="knr-cart-line__body">
+    <div class="knr-cart-line__top">
+      <div class="knr-cart-line__review">
+        {%- if rating != blank and rating_count > 0 -%}
+          {%- render 'knr-stars', rating: rating.rating -%}
+          <span class="knr-cart-line__review-count">{{ 'knr.reviews.count' | t: count: rating_count }}</span>
+        {%- endif -%}
+        <span class="knr-cart-line__price">
+          {%- if is_gift and total_price == 0 -%}
+            {{ 'knr.cart.free' | t }}
+          {%- else -%}
+            {%- if total_original_price > total_price -%}
+              <s class="knr-cart-line__price-compare">
+                <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                {{- total_original_price | money_without_trailing_zeros -}}
+              </s>
+              <span class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+            {%- endif -%}
+            {{ total_price | money_without_trailing_zeros }}
+          {%- endif -%}
+        </span>
+      </div>
+
+      <a class="knr-cart-line__title" href="{{ item.url }}">{{ title }}</a>
+      {%- unless item.product.has_only_default_variant -%}
+        <span class="knr-cart-line__variant">{{ item.variant.title | escape }}</span>
+      {%- endunless -%}
+    </div>
+
+    <div class="knr-cart-line__actions">
+      {%- if is_gift -%}
+        <form action="{{ routes.cart_update_url }}" method="post" data-knr-cart-line>
+          <input type="hidden" name="attributes[_knr_gift_declined]" value="true">
+          <button
+            type="submit"
+            class="knr-cart-line__remove"
+            name="updates[{{ item.key }}]"
+            value="0"
+            data-knr-focus="gift:remove"
+          >
+            {{- 'knr.cart.remove' | t -}}
+            <span class="visually-hidden"> {{ title }}</span>
+          </button>
+        </form>
+      {%- else -%}
+        <form class="knr-cart-line__qty" action="{{ routes.cart_change_url }}" method="post" data-knr-cart-line>
+          <input type="hidden" name="id" value="{{ item.key }}">
+          <button
+            type="submit"
+            class="knr-cart-line__qty-button"
+            name="quantity"
+            value="{{ item.quantity | minus: 1 }}"
+            data-knr-focus="{{ item.variant_id }}:minus"
+            aria-label="{{ 'products.product.quantity.decrease' | t: product: title }}"
+            {% if total_quantity <= 1 %}
+              disabled
+            {% endif %}
+          >
+            {%- render 'knr-icon', icon: 'minus' -%}
+          </button>
+          <span class="knr-cart-line__qty-value">
+            <span class="visually-hidden">{{ 'products.product.quantity.label' | t }} :</span>
+            {{ total_quantity }}
+          </span>
+          <button
+            type="submit"
+            class="knr-cart-line__qty-button"
+            name="quantity"
+            value="{{ item.quantity | plus: 1 }}"
+            data-knr-focus="{{ item.variant_id }}:plus"
+            aria-label="{{ 'products.product.quantity.increase' | t: product: title }}"
+          >
+            {%- render 'knr-icon', icon: 'plus-thin' -%}
+          </button>
+        </form>
+
+        <form action="{{ routes.cart_update_url }}" method="post" data-knr-cart-line>
+          {%- for key in line_keys -%}
+            <input type="hidden" name="updates[{{ key }}]" value="0">
+          {%- endfor -%}
+          <button type="submit" class="knr-cart-line__remove" data-knr-focus="{{ item.variant_id }}:remove">
+            {{- 'knr.cart.remove' | t -}}
+            <span class="visually-hidden"> {{ title }}</span>
+          </button>
+        </form>
+      {%- endif -%}
+    </div>
+  </div>
+</li>

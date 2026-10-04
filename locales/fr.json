@@ -561,6 +561,19 @@
         "one": "{{ count }} avis",
         "other": "{{ count }} avis"
       }
+    },
+    "cart": {
+      "progress_label": "Progression vers vos avantages",
+      "progress_value": "{{ current }} sur {{ total }}",
+      "tier_reached": "débloqué",
+      "tier_locked": "dès {{ amount }}",
+      "remove": "Supprimer",
+      "free": "Offert",
+      "samples_status": "{{ count }} sur {{ max }} choisis",
+      "back": "Retour au panier",
+      "sample_add": "Ajouter",
+      "sample_remove": "Retirer",
+      "samples_legend": "Choisissez jusqu'à {{ max }} échantillons"
     }
   }
 }

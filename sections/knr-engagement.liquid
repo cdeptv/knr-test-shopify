@@ -1,7 +1,7 @@
 {{ 'knr-base.css' | asset_url | stylesheet_tag }}
 {{ 'knr-engagement.css' | asset_url | stylesheet_tag }}
 {{ 'knr-product-variants.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'knr-product.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'knr-product.js' | asset_url }}" type="module"></script>
 
 {%- comment -%}
   Le contenu vient d'un métaobjet « Bloc Engagement »
@@ -104,7 +104,7 @@
               <p class="knr-engagement__card-price">{{ current_variant.price | money }}</p>
             </div>
 
-            {%- form 'product', product, id: card_form_id, class: 'knr-engagement__card-form' -%}
+            {%- form 'product', product, id: card_form_id, class: 'knr-engagement__card-form', data-knr-cart-add: '' -%}
               <input type="hidden" name="id" value="{{ current_variant.id }}">
               <button
                 type="submit"

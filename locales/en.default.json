@@ -549,6 +549,19 @@
         "one": "{{ count }} review",
         "other": "{{ count }} reviews"
       }
+    },
+    "cart": {
+      "progress_label": "Progress towards your rewards",
+      "progress_value": "{{ current }} of {{ total }}",
+      "tier_reached": "unlocked",
+      "tier_locked": "from {{ amount }}",
+      "remove": "Remove",
+      "free": "Free",
+      "samples_status": "{{ count }} of {{ max }} selected",
+      "back": "Back to cart",
+      "sample_add": "Add",
+      "sample_remove": "Remove",
+      "samples_legend": "Choose up to {{ max }} samples"
     }
   }
 }

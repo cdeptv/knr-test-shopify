@@ -3,6 +3,7 @@
   Usage : {% render 'knr-icon', icon: 'chevron' %}
   Icônes : chevron (8×4), plus (16×16), grip (12×12), cross (11×11),
   pin, search, bag (16×16), user (18×18), facebook, instagram, tiktok, linkedin (20×20)
+  Panier : bag-round (20×20), arrow-left (16×16), close, minus, plus-thin (12×12), plus-small (8×8), shipping, samples, gift (20×20)
 {%- endcomment -%}
 {%- case icon -%}
   {%- when 'chevron' -%}
@@ -55,5 +56,49 @@
   {%- when 'linkedin' -%}
     <svg class="knr-icon knr-icon--social" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none">
       <path fill-rule="evenodd" clip-rule="evenodd" d="M6.12417 4.565C6.12898 4.35683 6.09213 4.1498 6.01579 3.95607C5.93944 3.76234 5.82515 3.58582 5.67962 3.4369C5.53409 3.28797 5.36026 3.16963 5.16835 3.08883C4.97644 3.00804 4.77031 2.96642 4.56208 2.96642C4.35386 2.96642 4.14773 3.00804 3.95582 3.08883C3.7639 3.16963 3.59007 3.28797 3.44455 3.4369C3.29902 3.58582 3.18472 3.76234 3.10838 3.95607C3.03204 4.1498 2.99519 4.35683 3 4.565C2.99519 4.77317 3.03204 4.9802 3.10838 5.17393C3.18472 5.36766 3.29902 5.54418 3.44455 5.69311C3.59007 5.84203 3.7639 5.96037 3.95582 6.04117C4.14773 6.12196 4.35386 6.16358 4.56208 6.16358C4.77031 6.16358 4.97644 6.12196 5.16835 6.04117C5.36026 5.96037 5.53409 5.84203 5.67962 5.69311C5.82515 5.54418 5.93944 5.36766 6.01579 5.17393C6.09213 4.9802 6.12898 4.77317 6.12417 4.565ZM5.91 16H3.21417V7.31667H5.91V16ZM10.1833 7.31667H7.60083V16H10.2908V11.705C10.2908 10.5717 10.505 9.475 11.9075 9.475C13.2892 9.475 13.3075 10.77 13.3075 11.7775V16H16V11.2375C16 8.89917 15.4958 7.10167 12.7692 7.10167C11.4583 7.10167 10.5783 7.82083 10.2192 8.50417H10.1825V7.31667H10.1833Z" fill="currentColor"/>
+    </svg>
+  {%- comment -%} Panier coulissant (knr-cart-drawer) : tracés de la maquette Test 2 {%- endcomment -%}
+  {%- when 'bag-round' -%}
+    {%- comment -%} Sac arrondi du panier coulissant (maquette Test 2), 20×20 {%- endcomment -%}
+    <svg class="knr-icon knr-icon--bag-round" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M13.91 7.82V4.69a3.9 3.9 0 0 0-7.82-.02v3.15M19 5.41H1v4.81a9 9 0 0 0 18 0V5.41Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="square"/>
+    </svg>
+  {%- when 'arrow-left' -%}
+    <svg class="knr-icon knr-icon--arrow" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M6.61 3 1 8l5.61 5M1 8h14" stroke="currentColor" stroke-width="1.2" stroke-linecap="square"/>
+    </svg>
+  {%- when 'close' -%}
+    <svg class="knr-icon knr-icon--close" aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M11 1 1 11M11 11 1 1" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+  {%- when 'minus' -%}
+    <svg class="knr-icon knr-icon--minus" aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M1 6h10" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+    </svg>
+  {%- when 'plus-thin' -%}
+    <svg class="knr-icon knr-icon--plus-thin" aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M1 6h10M6 1v10" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+    </svg>
+  {%- when 'plus-small' -%}
+    <svg class="knr-icon knr-icon--plus-small" aria-hidden="true" focusable="false" width="8" height="8" viewBox="0 0 8 8" fill="none">
+      <path d="M1 4h6M4 1v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  {%- when 'shipping' -%}
+    <svg class="knr-icon knr-icon--tier" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <g stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7.47 14.32a1.6 1.6 0 1 0-3.19 0 1.6 1.6 0 0 0 3.19 0ZM15.1 14.32a1.6 1.6 0 1 0-3.2 0 1.6 1.6 0 0 0 3.2 0Z"/>
+        <path d="M13.5 12.72V5.82c0-.96-.78-1.74-1.74-1.74H4.21c-.95 0-1.71.77-1.71 1.71v6.8c0 .95.78 1.73 1.73 1.73M7.47 14.32h4.43M15.09 14.32h.68c.95 0 1.73-.78 1.73-1.73V9.72c0-.78-.46-1.49-1.17-1.8L13.5 6.67M15.5 10.34h2M8.74 9.9l1.32-1.32-1.32-1.31M10.06 8.58H5.94"/>
+      </g>
+    </svg>
+  {%- when 'samples' -%}
+    <svg class="knr-icon knr-icon--tier" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M11.65 17.5h-3.3M2.52 14.1c.26 1.86 1.5 3.16 3.37 3.38M14.08 17.48c1.87-.22 3.1-1.52 3.36-3.38M17.5 11.65v-3.3M11.65 2.5h-3.3M2.5 11.65v-3.3M2.52 5.91c.26-1.86 1.5-3.17 3.37-3.39M14.08 2.52c1.87.22 3.1 1.53 3.36 3.39" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  {%- when 'gift' -%}
+    <svg class="knr-icon knr-icon--tier" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <g stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7.11 2.86h7.03c2.46 0 3.99 1.74 3.99 4.19v6.63c0 2.45-1.53 4.18-3.99 4.18H7.11c-2.46 0-3.98-1.73-3.98-4.18V7.05c0-2.45 1.53-4.19 3.98-4.19Z"/>
+        <path d="M10.63 9.78c0-1.85 1.28-3.35 2.86-3.35.69 0 1.24.55 1.24 1.24 0 1.49-1.84 2.69-4.11 2.69-2.26 0-4.1-1.2-4.1-2.69 0-.69.55-1.24 1.24-1.24 1.58 0 2.86 1.5 2.86 3.35M7.58 13.71c.37-1.28 1.47-2.38 3.04-3.35 1.34.93 2.42 2.01 3.05 3.35M10.63 2.86v15M18.13 10.36h-15"/>
+      </g>
     </svg>
 {%- endcase -%}
